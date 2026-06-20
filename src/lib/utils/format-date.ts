@@ -85,8 +85,15 @@ function getBeninParts(isoTimestamp: string) {
     minute: "2-digit",
     hour12: false,
   }).formatToParts(new Date(isoTimestamp));
-  const get = (type: string) => Number(parts.find((p) => p.type === type)?.value);
-  return { year: get("year"), month: get("month"), day: get("day"), hour: get("hour"), minute: get("minute") };
+  const get = (type: string) =>
+    Number(parts.find((p) => p.type === type)?.value);
+  return {
+    year: get("year"),
+    month: get("month"),
+    day: get("day"),
+    hour: get("hour"),
+    minute: get("minute"),
+  };
 }
 
 /** Timestamptz -> "2025-05-17" (date calendaire au Bénin), pour les filtres/regroupements. */
@@ -106,4 +113,22 @@ export function formatShortDateLabel(isoTimestamp: string): string {
 export function formatTimeLabel(isoTimestamp: string): string {
   const { hour, minute } = getBeninParts(isoTimestamp);
   return `${String(hour).padStart(2, "0")}h${String(minute).padStart(2, "0")}`;
+}
+
+/** Timestamptz -> "2 mai 2025" (heure du Bénin, sans jour de semaine), pour les listes admin. */
+export function formatAdminDate(isoTimestamp: string): string {
+  const { year, month, day } = getBeninParts(isoTimestamp);
+  return `${day} ${MOIS[month - 1]} ${year}`;
+}
+
+/** Timestamptz -> "à l'instant" / "il y a 3h" / "il y a 2j", pour les listes admin. */
+export function formatRelativeTime(isoTimestamp: string): string {
+  const minutes = Math.floor(
+    (Date.now() - new Date(isoTimestamp).getTime()) / 60000,
+  );
+  if (minutes < 1) return "à l'instant";
+  if (minutes < 60) return `il y a ${minutes} min`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `il y a ${hours}h`;
+  return `il y a ${Math.floor(hours / 24)}j`;
 }

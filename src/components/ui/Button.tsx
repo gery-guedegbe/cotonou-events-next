@@ -27,23 +27,37 @@ const sizes: Record<Size, string> = {
   lg: "h-[50px] px-6 text-[15px]",
 };
 
-export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
-  { variant = "primary", size = "md", loading, className, children, disabled, ...props },
-  ref,
-) {
-  return (
-    <button
-      ref={ref}
-      disabled={disabled || loading}
-      className={cn(
-        "inline-flex items-center justify-center gap-2 rounded-pill font-semibold transition-[background,transform,border-color,color] duration-150 active:scale-[0.98]",
-        variants[variant],
-        sizes[size],
-        className,
-      )}
-      {...props}
-    >
-      {loading ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : children}
-    </button>
-  );
-});
+export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
+  function Button(
+    {
+      variant = "primary",
+      size = "md",
+      loading,
+      className,
+      children,
+      disabled,
+      ...props
+    },
+    ref,
+  ) {
+    return (
+      <button
+        ref={ref}
+        disabled={disabled || loading}
+        className={cn(
+          "inline-flex items-center justify-center gap-2 rounded-pill font-semibold transition-[background,transform,border-color,color] duration-150 active:scale-[0.98]",
+          variants[variant],
+          sizes[size],
+          className,
+        )}
+        {...props}
+      >
+        {loading ? (
+          <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+        ) : (
+          children
+        )}
+      </button>
+    );
+  },
+);

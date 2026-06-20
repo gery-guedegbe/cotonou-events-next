@@ -3,7 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { ExternalLink } from "lucide-react";
-import { PENDING_EVENTS, type PendingEvent } from "@/lib/data/admin";
+import type { Subscriber } from "@/lib/types/subscriber.types";
+import type { AdminPendingEvent, AdminEventListItem, RecentSubmission } from "@/lib/supabase/admin";
 import {
   AdminSidebar,
   AdminMobileNav,
@@ -12,15 +13,39 @@ import {
 } from "@/components/admin/AdminSidebar";
 import { OverviewTab } from "@/components/admin/tabs/OverviewTab";
 import { PendingTab } from "@/components/admin/tabs/PendingTab";
-import { PublishedTab } from "@/components/admin/tabs/PublishedTab";
+import { AllEventsTab } from "@/components/admin/tabs/AllEventsTab";
 import { SubscribersTab } from "@/components/admin/tabs/SubscribersTab";
 import { SystemTab } from "@/components/admin/tabs/SystemTab";
 
-export function AdminDashboard() {
+interface AdminDashboardProps {
+  userEmail: string;
+  allEvents: AdminEventListItem[];
+  pendingEvents: AdminPendingEvent[];
+  recentSubmissions: RecentSubmission[];
+  subscribers: Subscriber[];
+  subscriberTrend: number[];
+  overview: {
+    publishedCount: number;
+    pendingCount: number;
+    activeSubscribers: number;
+    weekendCount: number;
+  };
+}
+
+export function AdminDashboard({
+  userEmail,
+  allEvents,
+  pendingEvents,
+  recentSubmissions,
+  subscribers,
+  subscriberTrend,
+  overview,
+}: AdminDashboardProps) {
   const [tab, setTab] = useState<Tab>("overview");
-  const [pending, setPending] = useState<PendingEvent[]>(PENDING_EVENTS);
+  const [pending, setPending] = useState<AdminPendingEvent[]>(pendingEvents);
 
   const title = NAV.find((n) => n.key === tab)!.label;
+  const initials = userEmail.slice(0, 2).toUpperCase() || "AD";
 
   return (
     <div className="flex min-h-screen bg-gray-50">
@@ -44,19 +69,28 @@ export function AdminDashboard() {
               site
             </Link>
 
-            <div className="flex h-[34px] w-[34px] items-center justify-center rounded-full bg-brand text-[13px] font-bold text-white">
-              AD
+            <div
+              className="flex h-[34px] w-[34px] items-center justify-center rounded-full bg-brand text-[13px] font-bold text-white"
+              title={userEmail}
+            >
+              {initials}
             </div>
           </div>
         </header>
 
         <main className="p-[22px]">
-          {tab === "overview" && <OverviewTab pendingCount={pending.length} />}
+          {tab === "overview" && (
+            <OverviewTab
+              overview={overview}
+              recentSubmissions={recentSubmissions}
+              subscriberTrend={subscriberTrend}
+            />
+          )}
           {tab === "pending" && (
             <PendingTab pending={pending} onChange={setPending} />
           )}
-          {tab === "published" && <PublishedTab />}
-          {tab === "subs" && <SubscribersTab />}
+          {tab === "published" && <AllEventsTab events={allEvents} />}
+          {tab === "subs" && <SubscribersTab subscribers={subscribers} />}
           {tab === "system" && <SystemTab />}
         </main>
       </div>

@@ -1,15 +1,20 @@
-import { SUBSCRIBER_TREND } from "@/lib/data/admin";
-
 /** Graphique d'aire simple (line + area) des abonnés sur 30 jours. */
-export function SubscribersChart() {
+export function SubscribersChart({ trend }: { trend: number[] }) {
+  if (trend.length < 2 || trend.every((v) => v === 0)) {
+    return (
+      <div className="flex h-[170px] items-center justify-center text-sm text-gray-400">
+        Pas encore assez de données.
+      </div>
+    );
+  }
+
   const W = 600;
   const H = 170;
   const pad = 8;
-  const min = 40;
-  const max = 130;
-  const pts = SUBSCRIBER_TREND;
-  const step = (W - pad * 2) / (pts.length - 1);
-  const xy = pts.map(
+  const min = Math.min(...trend);
+  const max = Math.max(...trend, min + 1);
+  const step = (W - pad * 2) / (trend.length - 1);
+  const xy = trend.map(
     (v, i) =>
       [
         pad + i * step,

@@ -10,10 +10,10 @@ import {
   formatTimeLabel,
 } from "@/lib/utils/format-date";
 
-const EVENT_COLUMNS =
+export const EVENT_COLUMNS =
   "id,titre,description,date_debut,lieu_texte,quartier,categorie,prix,montant,organisateur_nom,source_type,image_url";
 
-interface EventRow {
+export interface EventRow {
   id: string;
   titre: string;
   description: string | null;
@@ -28,7 +28,7 @@ interface EventRow {
   image_url: string | null;
 }
 
-const SOURCE_LABEL: Record<
+export const SOURCE_LABEL: Record<
   NonNullable<EventRow["source_type"]>,
   EventSource
 > = {
@@ -36,7 +36,7 @@ const SOURCE_LABEL: Record<
   formulaire: "Formulaire",
 };
 
-function mapEvent(row: EventRow): CotonouEvent {
+export function mapEvent(row: EventRow): CotonouEvent {
   return {
     id: row.id,
     title: row.titre,

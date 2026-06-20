@@ -1,13 +1,43 @@
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Check, X, Eye, CheckCircle2 } from "lucide-react";
 import { CATEGORIES } from "@/lib/constants/categories";
-import type { PendingEvent } from "@/lib/data/admin";
+import { approveEvent, rejectEvent } from "@/lib/actions/admin-events";
+import { useToast } from "@/components/ui/Toast";
+import type { AdminPendingEvent } from "@/lib/supabase/admin";
 
 interface PendingTabProps {
-  pending: PendingEvent[];
-  onChange: (pending: PendingEvent[]) => void;
+  pending: AdminPendingEvent[];
+  onChange: (pending: AdminPendingEvent[]) => void;
 }
 
 export function PendingTab({ pending, onChange }: PendingTabProps) {
+  const router = useRouter();
+  const { toast } = useToast();
+  const [busyId, setBusyId] = useState<string | null>(null);
+
+  const handle = async (id: string, action: "approve" | "reject") => {
+    setBusyId(id);
+    const result =
+      action === "approve" ? await approveEvent(id) : await rejectEvent(id);
+    setBusyId(null);
+
+    if (!result.ok) {
+      toast({
+        variant: "error",
+        title: "Action impossible",
+        description: result.error,
+      });
+      return;
+    }
+
+    onChange(pending.filter((x) => x.id !== id));
+    router.refresh();
+  };
+
   if (pending.length === 0) {
     return (
       <div className="py-20 text-center">
@@ -65,22 +95,27 @@ export function PendingTab({ pending, onChange }: PendingTabProps) {
 
           <div className="flex items-center gap-2">
             <button
-              onClick={() => onChange(pending.filter((x) => x.id !== p.id))}
-              className="inline-flex items-center gap-1.5 rounded-pill bg-brand px-4 py-2.5 text-[13px] font-semibold text-white hover:bg-brand-hover"
+              disabled={busyId === p.id}
+              onClick={() => handle(p.id, "approve")}
+              className="inline-flex items-center gap-1.5 rounded-pill bg-brand px-4 py-2.5 text-[13px] font-semibold text-white hover:bg-brand-hover disabled:opacity-50"
             >
               <Check className="h-[15px] w-[15px]" aria-hidden /> Publier
             </button>
 
             <button
-              onClick={() => onChange(pending.filter((x) => x.id !== p.id))}
-              className="inline-flex items-center gap-1.5 rounded-pill border-[1.5px] border-red-200 bg-white px-4 py-2.5 text-[13px] font-semibold text-red-500 hover:bg-red-50"
+              disabled={busyId === p.id}
+              onClick={() => handle(p.id, "reject")}
+              className="inline-flex items-center gap-1.5 rounded-pill border-[1.5px] border-red-200 bg-white px-4 py-2.5 text-[13px] font-semibold text-red-500 hover:bg-red-50 disabled:opacity-50"
             >
               <X className="h-[15px] w-[15px]" aria-hidden /> Rejeter
             </button>
 
-            <button className="inline-flex items-center gap-1.5 rounded-pill px-3 py-2.5 text-[13px] font-semibold text-gray-500 hover:bg-gray-100">
+            <Link
+              href={`/admin/evenements/${p.id}`}
+              className="inline-flex items-center gap-1.5 rounded-pill px-3 py-2.5 text-[13px] font-semibold text-gray-500 hover:bg-gray-100"
+            >
               <Eye className="h-[15px] w-[15px]" aria-hidden /> Voir
-            </button>
+            </Link>
           </div>
         </div>
       ))}

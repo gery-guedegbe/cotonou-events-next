@@ -9,7 +9,13 @@ export interface FaqItem {
   a: string;
 }
 
-export function Accordion({ items, defaultOpen = 0 }: { items: FaqItem[]; defaultOpen?: number }) {
+export function Accordion({
+  items,
+  defaultOpen = 0,
+}: {
+  items: FaqItem[];
+  defaultOpen?: number;
+}) {
   const [open, setOpen] = useState<number>(defaultOpen);
 
   return (
@@ -17,19 +23,32 @@ export function Accordion({ items, defaultOpen = 0 }: { items: FaqItem[]; defaul
       {items.map((item, i) => {
         const isOpen = open === i;
         return (
-          <div key={i} className="overflow-hidden rounded-xl border border-gray-200 bg-white">
+          <div
+            key={i}
+            className="overflow-hidden rounded-xl border border-gray-200 bg-white"
+          >
             <button
               onClick={() => setOpen(isOpen ? -1 : i)}
               aria-expanded={isOpen}
               className="flex w-full items-center justify-between gap-3 p-4 text-left"
             >
-              <span className="text-[15px] font-semibold text-gray-900">{item.q}</span>
+              <span className="text-[15px] font-semibold text-gray-900">
+                {item.q}
+              </span>
+
               {isOpen ? (
-                <Minus className="h-[18px] w-[18px] flex-none text-brand" aria-hidden />
+                <Minus
+                  className="h-[18px] w-[18px] flex-none text-brand"
+                  aria-hidden
+                />
               ) : (
-                <Plus className="h-[18px] w-[18px] flex-none text-brand" aria-hidden />
+                <Plus
+                  className="h-[18px] w-[18px] flex-none text-brand"
+                  aria-hidden
+                />
               )}
             </button>
+
             <AnimatePresence initial={false}>
               {isOpen && (
                 <motion.div
@@ -38,7 +57,9 @@ export function Accordion({ items, defaultOpen = 0 }: { items: FaqItem[]; defaul
                   exit={{ height: 0, opacity: 0 }}
                   transition={{ duration: 0.2, ease: "easeInOut" }}
                 >
-                  <p className="px-4 pb-4 text-sm leading-relaxed text-gray-500">{item.a}</p>
+                  <p className="px-4 pb-4 text-sm leading-relaxed text-gray-500">
+                    {item.a}
+                  </p>
                 </motion.div>
               )}
             </AnimatePresence>

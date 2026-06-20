@@ -9,6 +9,7 @@ export function EventCardSkeleton() {
   return (
     <div className="overflow-hidden rounded-xl border border-gray-200">
       <Skeleton className="h-40 rounded-none" />
+
       <div className="flex flex-col gap-2.5 p-4">
         <Skeleton className="h-4 w-[85%]" />
         <Skeleton className="h-3 w-3/5" />

@@ -32,7 +32,23 @@ export const eventStep2Schema = z.object({
   quartier: z.enum(QUARTIERS as unknown as [string, ...string[]], {
     errorMap: () => ({ message: "Choisissez un quartier" }),
   }),
+  /** Renseigné quand quartier === "Autre" : nom réel du quartier, saisi librement. */
+  quartierAutre: z.string().optional(),
 });
+
+/** Si "Autre" est choisi, le nom réel du quartier devient obligatoire. */
+export function quartierRefine(
+  data: { quartier: string; quartierAutre?: string },
+  ctx: z.RefinementCtx,
+) {
+  if (data.quartier === "Autre" && !data.quartierAutre?.trim()) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["quartierAutre"],
+      message: "Précisez le nom du quartier",
+    });
+  }
+}
 
 export const eventStep3Schema = z.object({
   org: z.string().min(1, "Le nom de l'organisateur est requis"),
@@ -54,6 +70,7 @@ export const eventStep3Schema = z.object({
 
 export const eventSchema = eventStep1Schema
   .merge(eventStep2Schema)
-  .merge(eventStep3Schema);
+  .merge(eventStep3Schema)
+  .superRefine(quartierRefine);
 
 export type EventFormValues = z.infer<typeof eventSchema>;

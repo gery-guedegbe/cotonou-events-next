@@ -1,25 +1,45 @@
-"use client";
-
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { useAdminAuth } from "@/components/admin/AdminAuth";
+import { redirect } from "next/navigation";
+import { createServerSupabaseClient } from "@/lib/supabase/server";
+import {
+  getAllAdminEvents,
+  getAdminPendingEvents,
+  getRecentSubmissions,
+  getAdminSubscribersData,
+} from "@/lib/supabase/admin";
+import { isWeekend, toBeninDateKey } from "@/lib/utils/format-date";
 import { AdminDashboard } from "@/components/admin/AdminDashboard";
 
-export default function AdminPage() {
-  const router = useRouter();
-  const { authed, ready } = useAdminAuth();
+export default async function AdminPage() {
+  const supabase = await createServerSupabaseClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/admin/login");
 
-  useEffect(() => {
-    if (ready && !authed) router.replace("/admin/login");
-  }, [ready, authed, router]);
+  const [allEvents, pending, recentSubmissions, { subscribers, trend }] = await Promise.all([
+    getAllAdminEvents(),
+    getAdminPendingEvents(),
+    getRecentSubmissions(),
+    getAdminSubscribersData(),
+  ]);
 
-  if (!ready || !authed) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50 text-sm text-gray-400">
-        Chargement…
-      </div>
-    );
-  }
+  const published = allEvents.filter((e) => e.statut === "publie");
+  const todayKey = toBeninDateKey(new Date().toISOString());
+  const weekendCount = published.filter((e) => e.date >= todayKey && isWeekend(e.date)).length;
+  const activeSubscribers = subscribers.filter((s) => s.active).length;
 
-  return <AdminDashboard />;
+  return (
+    <AdminDashboard
+      userEmail={user.email ?? ""}
+      allEvents={allEvents}
+      pendingEvents={pending}
+      recentSubmissions={recentSubmissions}
+      subscribers={subscribers}
+      subscriberTrend={trend}
+      overview={{
+        publishedCount: published.length,
+        pendingCount: pending.length,
+        activeSubscribers,
+        weekendCount,
+      }}
+    />
+  );
 }

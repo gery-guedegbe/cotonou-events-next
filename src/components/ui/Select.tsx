@@ -11,7 +11,14 @@ interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
 }
 
 /** Select natif stylisé (chevron custom, état placeholder grisé). */
-export function Select({ placeholder, options, error, value, className, ...props }: SelectProps) {
+export function Select({
+  placeholder,
+  options,
+  error,
+  value,
+  className,
+  ...props
+}: SelectProps) {
   const [touched, setTouched] = useState(false);
   const isPlaceholder = !value;
   return (
@@ -35,7 +42,11 @@ export function Select({ placeholder, options, error, value, className, ...props
           </option>
         ))}
       </select>
-      <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" aria-hidden />
+
+      <ChevronDown
+        className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
+        aria-hidden
+      />
     </div>
   );
 }

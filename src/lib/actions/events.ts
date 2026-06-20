@@ -5,6 +5,7 @@ import {
   eventStep1Schema,
   eventStep2Schema,
   eventStep3Schema,
+  quartierRefine,
 } from "@/lib/validations/event.schema";
 import { CATEGORY_NAME_TO_SLUG } from "@/lib/constants/categories";
 import type { CategoryName } from "@/lib/types/event.types";
@@ -13,7 +14,8 @@ import { createServiceClient } from "@/lib/supabase/service";
 
 const serverEventSchema = eventStep1Schema
   .merge(eventStep2Schema)
-  .merge(eventStep3Schema.omit({ consent1: true, consent2: true }));
+  .merge(eventStep3Schema.omit({ consent1: true, consent2: true }))
+  .superRefine(quartierRefine);
 
 type ActionResult = { ok: true } | { ok: false; error: string };
 
@@ -37,6 +39,7 @@ export async function submitEvent(formData: FormData): Promise<ActionResult> {
     timeEnd: field(formData, "timeEnd") || undefined,
     address: field(formData, "address"),
     quartier: field(formData, "quartier"),
+    quartierAutre: field(formData, "quartierAutre") || undefined,
     org: field(formData, "org"),
     phone: field(formData, "phone"),
     email: field(formData, "email") || undefined,
@@ -76,6 +79,7 @@ export async function submitEvent(formData: FormData): Promise<ActionResult> {
   // Modération semi-automatique : date future => publication immédiate, sinon validation manuelle.
   const statut =
     new Date(dateDebut).getTime() > Date.now() ? "publie" : "en_attente";
+  const quartier = v.quartier === "Autre" ? v.quartierAutre!.trim() : v.quartier;
 
   const { error: insertError } = await supabase.from("events").insert({
     titre: v.title,
@@ -83,7 +87,7 @@ export async function submitEvent(formData: FormData): Promise<ActionResult> {
     date_debut: dateDebut,
     date_fin: dateFin,
     lieu_texte: v.address,
-    quartier: v.quartier,
+    quartier,
     categorie: CATEGORY_NAME_TO_SLUG[v.category as CategoryName],
     prix: v.priceType,
     montant: v.priceType === "payant" ? Number(v.amount) || null : null,

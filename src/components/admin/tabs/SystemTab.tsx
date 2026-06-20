@@ -11,6 +11,11 @@ export function SystemTab() {
 
   return (
     <>
+      <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-[13px] text-amber-800">
+        Aperçu — n8n, Apify et l&apos;API WhatsApp ne sont pas encore déployés.
+        Les chiffres ci-dessous sont illustratifs, pas des données réelles.
+      </div>
+
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="rounded-2xl border border-gray-200 bg-white p-[18px]">
           <div className="mb-3 flex items-center gap-2.5">

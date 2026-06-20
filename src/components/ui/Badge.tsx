@@ -24,7 +24,13 @@ export function CategoryBadge({
   );
 }
 
-export function PriceBadge({ price, className }: { price: number; className?: string }) {
+export function PriceBadge({
+  price,
+  className,
+}: {
+  price: number;
+  className?: string;
+}) {
   const free = price === 0;
   return (
     <span

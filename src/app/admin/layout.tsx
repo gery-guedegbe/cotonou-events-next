@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { AdminAuthProvider } from "@/components/admin/AdminAuth";
+import { ToastProvider } from "@/components/ui/Toast";
 
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
@@ -10,5 +10,5 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <AdminAuthProvider>{children}</AdminAuthProvider>;
+  return <ToastProvider>{children}</ToastProvider>;
 }

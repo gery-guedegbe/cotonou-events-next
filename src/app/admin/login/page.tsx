@@ -1,34 +1,41 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AlertCircle } from "lucide-react";
-import { useAdminAuth } from "@/components/admin/AdminAuth";
+import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { FieldLabel } from "@/components/ui/Field";
 
 export default function AdminLoginPage() {
   const router = useRouter();
-  const { authed, ready, login } = useAdminAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    if (ready && authed) router.replace("/admin");
-  }, [ready, authed, router]);
-
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (login(email, password)) {
-      router.replace("/admin");
-    } else {
-      setError(
-        "Identifiants incorrects. Renseignez un email et un mot de passe.",
-      );
+    setError("");
+    setLoading(true);
+
+    const supabase = createBrowserSupabaseClient();
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    setLoading(false);
+
+    if (signInError) {
+      setError("Email ou mot de passe incorrect.");
+      return;
     }
+
+    router.replace("/admin");
+    router.refresh();
   };
 
   return (
@@ -53,6 +60,7 @@ export default function AdminLoginPage() {
             <Input
               id="email"
               type="email"
+              autoComplete="username"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="admin@cotonou.events"
@@ -65,6 +73,7 @@ export default function AdminLoginPage() {
             <Input
               id="password"
               type="password"
+              autoComplete="current-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
@@ -78,7 +87,7 @@ export default function AdminLoginPage() {
             </div>
           )}
 
-          <Button type="submit" size="lg">
+          <Button type="submit" size="lg" loading={loading}>
             Se connecter
           </Button>
         </form>
@@ -87,10 +96,6 @@ export default function AdminLoginPage() {
           <Link href="/" className="text-[13px] text-gray-500 hover:text-brand">
             ← Retour au site
           </Link>
-        </div>
-
-        <div className="mt-3.5 text-center text-xs text-gray-400">
-          Démo : entrez n&apos;importe quel email et un mot de passe.
         </div>
       </div>
     </div>

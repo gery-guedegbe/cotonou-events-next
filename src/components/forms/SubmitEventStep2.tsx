@@ -97,6 +97,19 @@ export function SubmitEventStep2({
         />
 
         <FieldError>{errors.quartier?.message}</FieldError>
+
+        {values.quartier === "Autre" && (
+          <div className="mt-2.5">
+            <Input
+              id="quartierAutre"
+              {...register("quartierAutre")}
+              placeholder="Précisez le nom du quartier"
+              error={errors.quartierAutre?.message}
+            />
+
+            <FieldError>{errors.quartierAutre?.message}</FieldError>
+          </div>
+        )}
       </div>
     </div>
   );

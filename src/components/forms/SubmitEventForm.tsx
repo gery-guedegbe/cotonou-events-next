@@ -19,7 +19,7 @@ import { SubmitEventStep3 } from "@/components/forms/SubmitEventStep3";
 
 const STEP_FIELDS: (keyof EventFormValues)[][] = [
   ["title", "category", "description", "priceType", "amount", "link"],
-  ["dateStart", "timeStart", "dateEnd", "timeEnd", "address", "quartier"],
+  ["dateStart", "timeStart", "dateEnd", "timeEnd", "address", "quartier", "quartierAutre"],
   ["org", "phone", "email", "orgFb", "consent1", "consent2"],
 ];
 
@@ -47,6 +47,7 @@ export function SubmitEventForm() {
       link: "",
       email: "",
       orgFb: "",
+      quartierAutre: "",
     },
   });
 

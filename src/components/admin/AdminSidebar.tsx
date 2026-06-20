@@ -9,7 +9,7 @@ import {
   LogOut,
 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
-import { useAdminAuth } from "@/components/admin/AdminAuth";
+import { signOutAdmin } from "@/lib/actions/auth";
 
 export type Tab = "overview" | "pending" | "published" | "subs" | "system";
 
@@ -28,8 +28,8 @@ export const NAV: {
   { key: "pending", label: "À valider", short: "Valider", Icon: Clock },
   {
     key: "published",
-    label: "Événements publiés",
-    short: "Publiés",
+    label: "Tous les événements",
+    short: "Événements",
     Icon: CalendarCheck,
   },
   { key: "subs", label: "Abonnés WhatsApp", short: "Abonnés", Icon: Users },
@@ -43,8 +43,6 @@ interface NavProps {
 }
 
 export function AdminSidebar({ tab, onTabChange, pendingCount }: NavProps) {
-  const { logout } = useAdminAuth();
-
   return (
     <aside className="sticky top-0 hidden h-screen w-60 flex-none flex-col border-r border-gray-200 bg-white p-5 md:flex">
       <div className="px-2.5 pb-[18px] pt-1.5 text-lg font-extrabold tracking-[-0.03em]">
@@ -76,12 +74,14 @@ export function AdminSidebar({ tab, onTabChange, pendingCount }: NavProps) {
         ))}
       </nav>
 
-      <button
-        onClick={logout}
-        className="mt-auto flex items-center gap-[11px] rounded-[10px] px-3 py-2.5 text-sm font-semibold text-gray-500 hover:bg-gray-100"
-      >
-        <LogOut className="h-[18px] w-[18px]" aria-hidden /> Déconnexion
-      </button>
+      <form action={signOutAdmin} className="mt-auto">
+        <button
+          type="submit"
+          className="flex w-full items-center gap-[11px] rounded-[10px] px-3 py-2.5 text-left text-sm font-semibold text-gray-500 hover:bg-gray-100"
+        >
+          <LogOut className="h-[18px] w-[18px]" aria-hidden /> Déconnexion
+        </button>
+      </form>
     </aside>
   );
 }
