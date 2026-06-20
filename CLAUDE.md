@@ -33,22 +33,28 @@ WhatsApp, moins d'1h/semaine d'intervention manuelle de ma part.
 ## État actuel du projet
 
 Le frontend est déjà implémenté avec des données mockées et fonctionnel
-visuellement (toutes les interfaces ci-dessous existent en mock). L'étape en
-cours est de connecter la partie fonctionnelle réelle : base de données,
-automatisation, WhatsApp.
+visuellement. La base Supabase est créée avec son schéma initial. n8n est
+déployé sur Railway (instance avec PostgreSQL et Redis, mode queue) et
+opérationnel. L'étape en cours est la conception détaillée des workflows
+n8n avant leur construction réelle dans l'interface.
 
 **Prochaines étapes dans l'ordre** :
 
-1. Créer le schéma Supabase et brancher le frontend dessus (remplacer les mocks)
-2. Déployer n8n sur Railway
-3. Construire le workflow Apify → Supabase
-4. Configurer Meta WhatsApp Business API (templates + token)
-5. Construire les workflows WhatsApp (digest vendredi + gestion STOP/START)
-6. Connecter les formulaires (soumission événement + inscription alertes)
-7. Tests end-to-end
+1. Appliquer les migrations SQL listées dans ce fichier (colonnes
+   manquantes, table `events_rejetes_auto`, colonne générée
+   `titre_normalise`)
+2. Construire WF1 (scraping Apify) dans l'interface n8n avec le Code Node
+   de normalisation et filtrage déjà spécifié ci-dessous
+3. Construire WF2 (formulaire de soumission)
+4. Configurer Meta WhatsApp Business API (templates + token + webhook)
+5. Construire WF3 (digest vendredi) et WF4 (gestion STOP/START)
+6. Construire WF5 (monitoring partagé)
+7. Connecter les formulaires Next.js aux webhooks n8n correspondants
+8. Tests end-to-end
 
 Ne pas reconstruire les interfaces déjà faites sans demande explicite — se
-concentrer sur la connexion des données réelles.
+concentrer sur la connexion des données réelles et la construction des
+workflows.
 
 ---
 
@@ -57,7 +63,8 @@ concentrer sur la connexion des données réelles.
 ### Inclus
 
 - Scraping automatique Facebook Events via Apify (Actor
-  `apify/facebook-events-scraper`), exécution nocturne
+  `apify/facebook-events-scraper`), **deux fois par semaine** (lundi et
+  jeudi, pas plus fréquent — voir section Budget Apify)
 - Formulaire de soumission d'événement par les organisateurs
 - Site web public : liste filtrée, recherche, détail de chaque événement
 - Inscription aux alertes WhatsApp (numéro +229 + catégories favorites)
@@ -65,9 +72,10 @@ concentrer sur la connexion des données réelles.
   individuels personnalisés, PAS un canal de diffusion groupé)
 - Gestion des réponses STOP/START WhatsApp (désabonnement/réabonnement)
 - Dashboard admin minimal (validation, stats, monitoring système)
-- Modération semi-automatique : règles simples (date future + titre + lieu
-  présents) publient automatiquement, sinon statut "en_attente" pour
-  validation manuelle
+- Modération semi-automatique différenciée par source (voir section
+  Règles de publication automatique)
+- Filtrage qualité des données scrapées (exclusion spam commercial,
+  événements récurrents, doublons inter-pages) avec table d'audit dédiée
 
 ### Explicitement hors scope V1 — ne pas implémenter sans demande explicite
 
@@ -84,6 +92,11 @@ concentrer sur la connexion des données réelles.
 - Édition complète d'un événement déjà soumis (en V1 : rejeter et laisser
   l'organisateur resoumettre)
 - Gestion de rôles multi-administrateurs (un seul admin : moi)
+- Gestion des événements récurrents Facebook (`eventFrequency` DAILY,
+  WEEKLY, MONTHLY) : exclus systématiquement du scraping en V1, trop
+  complexes à représenter proprement (un seul événement avec des dizaines
+  de `childEvents`). Pourra être traité en V2 avec un vrai modèle de
+  récurrence.
 
 ---
 
@@ -95,7 +108,8 @@ concentrer sur la connexion des données réelles.
   planifiée et événementielle.
 - **n8n est hébergé sur Railway**, pas n8n Cloud (trop cher à $20/mois pour
   une V1), pas Render (le free tier dort après 15 min d'inactivité, ce qui
-  casse les crons).
+  casse les crons). Instance Railway actuelle : n8n + PostgreSQL + Redis,
+  mode queue (`EXECUTIONS_MODE=queue`), timezone `Africa/Porto-Novo`.
 - **Apify Facebook Events Scraper** (`apify/facebook-events-scraper`) est la
   source principale de scraping, pas de Playwright custom — l'Actor est
   maintenu par Apify directement, ce qui évite la maintenance face aux
@@ -108,6 +122,201 @@ concentrer sur la connexion des données réelles.
   sont identifiés uniquement par leur numéro de téléphone, pas de compte.
 - **Le dashboard admin est protégé par Supabase Auth** (email + mot de passe
   simple), un seul rôle admin, pas de système de permissions complexe.
+- **Utiliser les modules n8n natifs plutôt que des HTTP Request génériques**
+  partout où ils existent (voir section Modules n8n). Le HTTP Request brut
+  est réservé aux cas où aucun module natif ne couvre le besoin (ex :
+  upsert conditionnel Postgres).
+
+---
+
+## Modules n8n natifs à utiliser
+
+| Besoin                                                  | Module n8n                                           | Détail                                                                                                                                                                                                                                                                                         |
+| ------------------------------------------------------- | ---------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Lancer un Actor Apify et récupérer le dataset           | Node Apify (community node `@apify/n8n-nodes-apify`) | Opération "Run Actor and get dataset items" : exécute, attend la fin, retourne les résultats en un seul nœud. À installer via Settings → Community Nodes si pas déjà fait.                                                                                                                     |
+| Écrire/upsert dans Supabase avec logique conditionnelle | Node Postgres (pas le node Supabase natif)           | Le node Supabase natif ne supporte pas l'upsert nativement (limitation connue de la communauté n8n). Se connecter directement à la base PostgreSQL Supabase via Project Settings puis Database puis Connection string.                                                                         |
+| Lire des lignes Supabase simples                        | Node Supabase natif                                  | Suffisant pour les lectures (SELECT) sans logique conditionnelle complexe.                                                                                                                                                                                                                     |
+| Envoyer des messages WhatsApp                           | Node WhatsApp Business Cloud                         | Gère l'envoi de templates et de messages libres (fenêtre 24h), ainsi que l'upload/téléchargement de médias.                                                                                                                                                                                    |
+| Écouter les messages WhatsApp entrants                  | Node WhatsApp Trigger (pas Facebook Trigger)         | n8n recommande explicitement ce node plutôt que le Facebook Trigger générique : il couvre deux fois plus de types d'événements. Point de vigilance : WhatsApp n'autorise qu'un seul webhook actif par app — basculer entre URL de test et URL de production écrase l'enregistrement précédent. |
+
+---
+
+## Architecture des workflows n8n
+
+Cinq workflows indépendants, Supabase comme hub central. Chaque nœud à
+partir du nœud Apify/webhook a l'option Continue On Fail activée — une
+erreur sur un item ne doit jamais arrêter tout le run.
+
+### WF1 — Scraping Apify
+
+Déclencheur : Schedule Trigger, cron `0 5 * * 1,4` (lundi et jeudi à
+5h00, timezone Africa/Porto-Novo).
+
+Pourquoi cette fréquence et pas plus : voir section Budget Apify
+ci-dessous. Le digest WhatsApp du vendredi n'a pas besoin de données
+détectées à la minute — un run le jeudi matin suffit largement à jour la
+base avant l'envoi du vendredi 18h.
+
+Séquence des nœuds :
+
+1. Node Apify, opération "Run Actor and get dataset items", Actor
+   `apify/facebook-events-scraper`, input avec l'URL d'exploration Cotonou
+2. Code Node de normalisation et filtrage (voir section dédiée
+   ci-dessous pour le détail complet)
+3. IF : route selon `_rejete` — si vrai, vers `events_rejetes_auto` ;
+   si faux, continue
+4. Node Postgres, Check 1 : recherche par `apify_id` exact
+5. IF : si trouvé, UPDATE (popularité, description) sur la ligne
+   existante et fin de branche ; si absent, continue vers Check 2
+6. Node Postgres, Check 2 : recherche par `titre_normalise` +
+   `date_debut::date` (détecte les doublons inter-pages Facebook, où le
+   même événement réel existe sous deux `apify_id` différents)
+7. IF : si trouvé, UPDATE pour ajouter le nouvel `apify_id` dans
+   `apify_id_alternatif` (pas de nouvelle ligne) ; si absent, INSERT
+   réel dans `events`
+8. Aggregate / Code Node : compteurs (ajoutés, mis à jour, rejetés
+   par filtre, doublons)
+9. Execute Workflow vers WF5 (monitoring partagé)
+
+### WF2 — Soumission formulaire
+
+Déclencheur : Webhook, appelé par la Server Action Next.js après
+upload de l'image vers Supabase Storage.
+
+Séquence : validation serveur stricte (ne jamais faire confiance au
+client) puis Node Postgres INSERT avec `source_type = 'formulaire'` puis
+peut être `statut = 'publie'` directement si tous les champs sont complets
+(contrairement à Apify, l'organisateur déclare lui-même le prix, donc pas
+besoin du filet de sécurité prix) puis notification admin puis Respond to
+Webhook vers Next.js pour la page de confirmation.
+
+### WF3 — Digest hebdomadaire WhatsApp
+
+Déclencheur : Schedule Trigger, cron `0 18 * * 5` (vendredi 18h00).
+
+Séquence : requête Supabase top événements publiés du week-end, puis pour
+chaque `subscriber` actif, filtrer par `categories`, puis formater le
+message, puis Node WhatsApp Business Cloud (template pré-approuvé Meta),
+puis logger dans `whatsapp_logs` (succès ou échec par destinataire, sans
+bloquer la boucle), puis Wait 1 seconde entre chaque envoi (respect du
+rate limit Meta), puis Execute Workflow vers WF5.
+
+### WF4 — Webhook entrant WhatsApp
+
+Déclencheur : Node WhatsApp Trigger natif, écoute permanente,
+événement "Messages".
+
+Séquence : extraction du numéro et du texte, puis détection d'intention
+(STOP/ARRET/DESABONNER vs START/OUI), puis branche STOP : `subscribers.actif
+= false` + message de confirmation libre (fenêtre 24h, pas de template
+requis puisque c'est l'utilisateur qui a initié), puis branche START :
+`subscribers.actif = true` + message de bienvenue.
+
+### WF5 — Monitoring et notifications (sous-workflow partagé)
+
+Appelé depuis WF1 et WF3 via Execute Workflow, reçoit les compteurs en
+entrée. Formate un résumé et envoie une notification (email ou Slack)
+uniquement s'il y a eu des erreurs — pas de notification systématique
+à chaque run réussi, pour éviter la fatigue d'alerte.
+
+---
+
+## Règles de publication automatique (différenciées par source)
+
+Source `formulaire` : l'organisateur déclare lui-même le prix de façon
+fiable. Peut être `statut = 'publie'` automatiquement si tous les champs
+obligatoires sont présents.
+
+Source `apify` : Apify ne fournit aucun champ prix fiable (`isFree`
+n'existe pas dans les données réelles, `ticketsInfo.price` est
+systématiquement `null`). Le prix est donc extrait par regex depuis la
+description (recherche de montants suivis de "FCFA"/"francs"). Trois cas :
+
+1. Montant FCFA détecté par regex : `prix = 'payant'`, `montant` =
+   le montant le plus élevé trouvé (cas de plusieurs frais, ex.
+   inscription + participation), `statut = 'publie'`
+2. Aucune mention d'argent dans la description : `prix = 'gratuit'`,
+   `statut = 'publie'` (publié en confiance)
+3. Mention d'argent détectée mais regex n'a pas extrait de montant net
+   (prix mal formaté, ambigu) : `prix = 'gratuit'` par défaut MAIS
+   `statut = 'en_attente'` — filet de sécurité explicite : on ne publie
+   jamais un événement comme gratuit si une mention d'argent existe
+   sans certitude sur le montant. Décision prise consciemment après avoir
+   observé des cas réels (tournoi sportif, formation professionnelle) où
+   le prix existe mais n'est pas capturé proprement par la regex.
+
+---
+
+## Filtres de qualité appliqués avant insertion (WF1)
+
+Quatre filtres successifs dans le Code Node de normalisation, chacun
+loggant sa raison de rejet plutôt que de rejeter silencieusement :
+
+1. Récurrence : `eventFrequency` dans `['DAILY', 'WEEKLY', 'MONTHLY']`
+   donc rejeté (raison `recurrence`). Ces événements ont des dizaines de
+   `childEvents` et représentent presque toujours du contenu commercial
+   récurrent (promotions boutique, programmes hebdomadaires) plutôt que
+   de vrais événements ponctuels, observé sur les données réelles
+   scrapées.
+2. Annulation : `isCanceled = true` donc rejeté (raison `annule`)
+3. Champs manquants : `name` ou `utcStartDate` absents donc rejeté
+   (raison `champs_manquants`)
+4. Spam commercial : détection par mots-clés sur le titre
+   (promotion, solde, vente flash) ou sur la combinaison description
+   courte + mention prix + livraison à domicile, donc rejeté (raison
+   `spam_commercial`). Observé sur les données réelles : des fiches
+   produits (téléviseurs, etc.) publiées comme "événements" Facebook.
+5. Liste de noms : description constituée presque exclusivement de
+   noms propres séparés par des virgules sans aucune mention de date/heure,
+   donc rejeté (raison `liste_noms`). Cas observé : posts de remerciement
+   aux followers ("Thank You All").
+
+Tous les items rejetés par ces filtres sont insérés dans
+`events_rejetes_auto` avec la raison et les données brutes complètes, pour
+permettre un audit et un ajustement des règles après usage réel — jamais
+perdus silencieusement.
+
+---
+
+## Déduplication à deux niveaux
+
+Nécessaire car deux runs espacés (lundi/jeudi) peuvent capter le même
+événement réel sous deux apparences différentes :
+
+Niveau 1, `apify_id` exact : le même run ou un run ultérieur retombe
+sur la même page Facebook event. Géré par la recherche directe sur
+`apify_id` avant toute écriture.
+
+Niveau 2, similarité titre + date : le même événement réel a été
+créé comme deux événements Facebook distincts par deux pages différentes
+(cas réel observé : "FSM Cotonou 2026" sous deux `id` différents, "Marathon
+Commercial de Cotonou" sous deux `id` différents). Géré par la colonne
+générée `titre_normalise` (alphanumérique minuscule) combinée à
+`date_debut::date`. Quand une correspondance est trouvée à ce niveau, le
+nouvel `apify_id` est ajouté au tableau `apify_id_alternatif` de la ligne
+existante plutôt que de créer un doublon.
+
+Angle mort accepté pour la V1 : les variations de titre qui changent
+les mots eux-mêmes (ex. "FSM Cotonou 2026" vs "Forum Social Mondial
+Cotonou 2026") ne sont pas détectées par cette approche alphanumérique
+simple. Décision consciente : une logique de similarité floue
+(Levenshtein, embeddings) ajouterait de la complexité et des faux positifs
+(deux événements différents fusionnés par erreur) pour un bénéfice
+marginal. Les doublons résiduels de ce type restent visibles et filtrables
+manuellement dans le dashboard admin.
+
+---
+
+## Budget Apify et fréquence de scraping
+
+Plan gratuit Apify : 5$ de crédit mensuel, ne roule pas d'un mois à
+l'autre, bloque les nouveaux runs une fois épuisé (pas de facturation en
+dépassement). Coût observé sur un run réel : 0,38$. À raison de deux runs
+par semaine (lundi et jeudi) : environ 8-9 runs par mois, soit environ
+3,40$/mois, reste dans le budget gratuit avec marge. Une fréquence plus
+élevée (quotidienne ou toutes les 2h) dépasserait largement le budget
+gratuit et risquerait de bloquer silencieusement le pipeline en plein
+mois. Ne pas augmenter cette fréquence sans recalculer le budget réel.
 
 ---
 
@@ -122,13 +331,13 @@ concentrer sur la connexion des données réelles.
 | Formulaires          | React Hook Form + Zod                   | Validation et gestion d'état des formulaires |
 | Base de données      | Supabase (PostgreSQL)                   | Données + API auto-générée + Auth + Storage  |
 | Orchestration        | n8n (auto-hébergé)                      | Crons, webhooks, logique d'automatisation    |
-| Hébergement n8n      | Railway                                 | Serveur persistant pour n8n                  |
+| Hébergement n8n      | Railway (n8n + PostgreSQL + Redis)      | Serveur persistant pour n8n, mode queue      |
 | Scraping             | Apify (`apify/facebook-events-scraper`) | Collecte événements Facebook                 |
 | Messagerie           | Meta WhatsApp Business Cloud API        | Envoi et réception des messages WhatsApp     |
 | Hébergement frontend | Vercel                                  | Déploiement Next.js                          |
 | Stockage fichiers    | Supabase Storage                        | Images des événements                        |
 
-**Interdiction explicite** : ne pas utiliser de librairie de composants UI
+Interdiction explicite : ne pas utiliser de librairie de composants UI
 (shadcn/ui, Material-UI, Chakra UI, Radix, Ant Design, etc.). Tous les
 composants sont custom, écrits à la main, réutilisables dans
 `components/ui/`.
@@ -167,6 +376,8 @@ create table events (
   prix text check (prix in ('gratuit','payant','donation')),
   montant integer,
   quartier text,
+  latitude numeric,
+  longitude numeric,
   image_url text,
   url_source text,
   source_type text check (source_type in ('apify','formulaire')),
@@ -178,6 +389,25 @@ create table events (
   organisateur_email text,
   organisateur_contact_fb text,
   apify_id text unique,
+  apify_id_alternatif text[],
+  popularite_score integer default 0,
+  titre_normalise text generated always as (
+    lower(regexp_replace(titre, '[^a-zA-Z0-9]', '', 'g'))
+  ) stored,
+  created_at timestamptz default now()
+);
+
+-- Evenements rejetes automatiquement par les filtres qualite (audit)
+create table events_rejetes_auto (
+  id uuid primary key default gen_random_uuid(),
+  apify_id text,
+  titre text,
+  description text,
+  raison_rejet text not null check (raison_rejet in (
+    'recurrence', 'spam_commercial', 'annule', 'champs_manquants',
+    'liste_noms'
+  )),
+  donnees_brutes jsonb,
   created_at timestamptz default now()
 );
 
@@ -205,31 +435,56 @@ create index on events(date_debut);
 create index on events(statut);
 create index on events(categorie);
 create index on events(source_type);
+create index on events(titre_normalise, date_debut);
+create index on events_rejetes_auto(raison_rejet);
+create index on events_rejetes_auto(created_at);
 ```
 
-**`montant`** : valeur numérique en FCFA, renseignée quand `prix` vaut
-`payant` ou `donation` (`null` si `gratuit`). Ajoutée car le formulaire de
-soumission collecte déjà ce montant et le frontend l'affiche directement
-("5 000 FCFA").
+`montant` : valeur numérique en FCFA, renseignée quand `prix` vaut
+`payant` ou `donation` (`null` si `gratuit`). Pour les événements Apify,
+extrait par regex depuis `description` (voir section Règles de publication
+automatique).
 
-**`quartier` (sur `events`)** : dénormalisé depuis `venues.quartier` plutôt
-que de dépendre uniquement de la jointure `lieu_id` → `venues`. La majorité
-des événements scrapés via Apify n'auront qu'un `lieu_texte` libre, sans
-`venue` propre — sans cette colonne, le filtre "Quartier" du site ne
-fonctionnerait pour aucun événement scrapé.
+`quartier` (sur `events`) : dénormalisé depuis `venues.quartier` plutôt
+que de dépendre uniquement de la jointure `lieu_id` vers `venues`. La
+majorité des événements scrapés via Apify n'auront qu'un `lieu_texte`
+libre, sans `venue` propre, donc sans cette colonne le filtre "Quartier"
+du site ne fonctionnerait pour aucun événement scrapé.
 
-**`organisateur_email` / `organisateur_contact_fb`** : le formulaire de
+`latitude` / `longitude` (sur `events`) : Apify fournit ces coordonnées
+directement dans `location.latitude`/`location.longitude` pour la majorité
+des événements scrapés. Stockées même sans `venue` liée, pour permettre
+l'affichage sur carte des événements Apify. Note : ces coordonnées sont
+parfois génériques (centroïde de "Cotonou" plutôt que le lieu précis) quand
+Facebook n'a pas de localisation fine, donc ne pas leur faire une confiance
+absolue pour un zoom précis.
+
+`apify_id_alternatif` : tableau des `apify_id` additionnels détectés
+comme désignant le même événement réel que cette ligne (voir section
+Déduplication à deux niveaux). Permet de tracer les doublons inter-pages
+sans dupliquer les lignes.
+
+`popularite_score` : somme de `usersGoing` + `usersInterested` fournis
+par Apify. Utile pour trier les événements "tendance" en featured sur la
+landing page, sans logique de scoring complexe.
+
+`titre_normalise` : colonne générée automatiquement (alphanumérique
+minuscule sans espaces), utilisée pour la déduplication de niveau 2 et
+indexée avec `date_debut`.
+
+`organisateur_email` / `organisateur_contact_fb` : le formulaire de
 soumission collecte déjà ces deux champs optionnels (email de contact, page
 Facebook de l'organisateur) pour permettre à l'admin de recontacter
 l'organisateur ; ajoutés pour ne pas perdre cette donnée à l'insertion.
 
-**Row Level Security** :
+Row Level Security :
 
 ```sql
 alter table venues enable row level security;
 alter table events enable row level security;
 alter table subscribers enable row level security;
 alter table whatsapp_logs enable row level security;
+alter table events_rejetes_auto enable row level security;
 
 create policy "Lecture publique des venues" on venues
   for select using (true);
@@ -237,86 +492,57 @@ create policy "Lecture publique des venues" on venues
 create policy "Lecture publique des evenements publies" on events
   for select using (statut = 'publie');
 
--- Pas de policy sur subscribers / whatsapp_logs : aucun accès anonyme,
--- ni en lecture ni en écriture. Seul service_role (qui contourne RLS)
--- peut y accéder, depuis n8n ou les Server Actions.
+-- Pas de policy sur subscribers / whatsapp_logs / events_rejetes_auto :
+-- aucun acces anonyme, ni en lecture ni en ecriture. Seul service_role
+-- (qui contourne RLS) peut y acceder, depuis n8n ou les Server Actions.
 ```
 
 Toute écriture (sur `events` comme sur `subscribers`/`whatsapp_logs`) passe
 par le rôle `service_role` (depuis n8n ou les Server Actions), jamais depuis
 le client anonyme directement. Les formulaires publics (soumission
-d'événement, inscription aux alertes) écrivent via des **Server Actions**
+d'événement, inscription aux alertes) écrivent via des Server Actions
 Next.js qui utilisent `SUPABASE_SERVICE_ROLE_KEY` côté serveur uniquement.
+Le node Postgres de n8n se connecte directement via les credentials de
+base de données Supabase (host/port/user/password), distincts de la clé
+API `service_role`.
 
-**Storage** : bucket `event-images` (public en lecture), pour les affiches
+Storage : bucket `event-images` (public en lecture), pour les affiches
 uploadées via le formulaire de soumission. Upload fait exclusivement côté
 serveur (Server Action), donc aucune policy d'écriture n'est nécessaire.
 
-**Catégories valides** (utilisées partout dans l'UI et la DB) : concert,
+Catégories valides (utilisées partout dans l'UI et la DB) : concert,
 culture, sport, business, formation, religieux, gastronomie, nightlife
-(« Vie nocturne »), mode_beaute (« Mode & Beauté »), famille, communautaire,
+(Vie nocturne), mode_beaute (Mode et Beauté), famille, communautaire,
 autre.
 
-**Quartiers de Cotonou** (liste de référence pour les selects) : Haie-Vive,
+Quartiers de Cotonou (liste de référence pour les selects) : Haie-Vive,
 Cadjèhoun, Akpakpa, Fidjrossè, Centre-ville, Dantokpa, Gbèdjromèdji, Agla,
 Zogbo, Autre.
 
 ---
 
-## Flux de données et automatisations
-
-```
-[Apify Actor - cron nocturne 2h00]
-    -> webhook completion -> [n8n]
-    -> deduplication via apify_id -> [Supabase insert]
-    -> regle auto-publication (date future + titre + lieu => publie,
-       sinon en_attente)
-
-[Formulaire de soumission organisateur]
-    -> Next.js Server Action
-    -> validation Zod
-    -> upload image vers Supabase Storage
-    -> insert Supabase, statut = en_attente
-    -> notification admin
-
-[Vendredi 18h00 - n8n cron]
-    -> requete Supabase top 7 evenements du week-end
-    -> pour chaque subscriber actif, filtre par categories
-    -> formatage message template Meta
-    -> envoi individuel via Meta Cloud API
-    -> log dans whatsapp_logs
-
-[Webhook WhatsApp entrant - n8n, ecoute permanente]
-    -> detection STOP/ARRET/DESABONNER -> subscribers.actif = false
-       + message de confirmation libre (fenetre 24h)
-    -> detection START/OUI -> subscribers.actif = true
-       + message de bienvenue
-```
-
----
-
 ## Conventions de code
 
-**Taille des fichiers** : aucun fichier ne doit dépasser 300 lignes. Si une
+Taille des fichiers : aucun fichier ne doit dépasser 300 lignes. Si une
 implémentation dépasse cette limite, décomposer en sous-composants ou
 extraire la logique dans un hook/utilitaire séparé.
 
-**Nommage des fichiers** : PascalCase pour les composants React
+Nommage des fichiers : PascalCase pour les composants React
 (`EventCard.tsx`), camelCase pour les utilitaires et hooks
 (`formatDate.ts`, `useEventFilters.ts`), kebab-case pour les routes Next.js.
 
-**Composants** : tous dans `components/`, organisés par domaine
+Composants : tous dans `components/`, organisés par domaine
 (`components/ui/`, `components/events/`, `components/forms/`,
 `components/admin/`, `components/layout/`, `components/sections/`). Chaque
 composant est typé strictement (props interface explicite, jamais `any`).
 Principe DRY strict : pas de duplication, extraire un composant réutilisable
 dès qu'un pattern UI apparaît 2 fois.
 
-**Validation** : tous les formulaires utilisent React Hook Form + un schéma
+Validation : tous les formulaires utilisent React Hook Form + un schéma
 Zod correspondant dans `lib/validations/`. La validation se fait au blur, pas
 seulement au submit.
 
-**Rendu Next.js** : choisir le mode de rendu selon la page :
+Rendu Next.js : choisir le mode de rendu selon la page :
 
 - `/` (landing) : SSG
 - `/evenements` (liste) : SSR avec revalidation 1h
@@ -325,30 +551,33 @@ seulement au submit.
 - Pages avec formulaires (`/soumettre`, `/alertes`) : CSR
 - `/admin/*` : CSR, protégé par Supabase Auth
 
-**Gestion des états asynchrones** : chaque fetch de données doit avoir un
+Gestion des états asynchrones : chaque fetch de données doit avoir un
 état loading (skeleton, jamais de spinner plein écran), un état error
 (message clair + action de retry si pertinent), et un état empty (illustration
 légère + texte explicatif). Ne jamais laisser un écran vide sans feedback.
 
-**Logs et erreurs** : erreurs catchées et loggées de façon structurée (pas de
+Logs et erreurs : erreurs catchées et loggées de façon structurée (pas de
 `console.log` brut en production). Les erreurs utilisateur affichent un
-message clair en français, jamais la stack trace brute.
+message clair en français, jamais la stack trace brute. Côté n8n : chaque
+nœud à partir du déclencheur a Continue On Fail activé, les erreurs
+individuelles sont comptées et rapportées via WF5 plutôt que d'interrompre
+tout le run.
 
-**Accessibilité** : contraste WCAG AA minimum, tous les inputs ont un label
+Accessibilité : contraste WCAG AA minimum, tous les inputs ont un label
 associé, tous les éléments interactifs sont focusables au clavier avec un
 focus ring visible, les icônes décoratives ont `aria-hidden`, les icônes
 seules ont un `aria-label`.
 
-**Mobile first** : toute interface est conçue et testée d'abord en mobile
+Mobile first : toute interface est conçue et testée d'abord en mobile
 (375px), puis adaptée en tablette puis desktop. La majorité des utilisateurs
 attendus sont sur téléphone.
 
-**Style de code** : pas d'emojis dans le code, les commits, ou les commentaires.
+Style de code : pas d'emojis dans le code, les commits, ou les commentaires.
 Code commenté de façon utile (le pourquoi, pas le quoi évident). README.md
 simple et direct, pensé pour qu'un autre développeur reprenne le projet sans
 friction.
 
-**Sécurité frontend** : aucune clé secrète (`SUPABASE_SERVICE_ROLE_KEY`,
+Sécurité frontend : aucune clé secrète (`SUPABASE_SERVICE_ROLE_KEY`,
 tokens Meta, tokens Apify) ne doit jamais apparaître côté client. Ces clés
 restent dans les variables d'environnement serveur ou dans n8n credentials,
 jamais dans `NEXT_PUBLIC_*`.
@@ -395,5 +624,8 @@ maquettes déjà produites avant d'inventer un nouveau pattern visuel.
   larges non demandés.
 - Ne jamais introduire de librairie de composants UI (shadcn, MUI, Chakra,
   Radix, Ant Design) — composants custom uniquement.
+- Privilégier les modules n8n natifs (voir section Modules n8n) plutôt que
+  des HTTP Request génériques, sauf quand aucun module natif ne couvre le
+  besoin.
 - Mettre à jour ce fichier si une décision d'architecture change en cours de
   route, pour que le contexte reste fiable dans le temps.
