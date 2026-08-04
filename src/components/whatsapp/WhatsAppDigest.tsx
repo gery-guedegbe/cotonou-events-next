@@ -37,7 +37,7 @@ function ChatHeader({ compact }: { compact?: boolean }) {
           className={
             compact
               ? "text-sm font-bold text-white"
-              : "text-[15px] font-bold text-white"
+              : "text-base font-bold text-white"
           }
         >
           Cotonou.events
@@ -68,13 +68,13 @@ export function WhatsAppDigest({
             📅 Vos événements du week-end
           </div>
 
-          <div className="mt-1.5 text-[13px] text-gray-700">
+          <div className="mt-1.5 text-sm text-gray-700">
             Bonjour Koffi 👋 Voici les meilleurs plans à Cotonou ce week-end :
           </div>
 
           <div className="my-2.5 h-px bg-black/10" />
 
-          <div className="flex flex-col gap-2 text-[13px] leading-relaxed text-gray-800">
+          <div className="flex flex-col gap-2 text-sm leading-relaxed text-gray-800">
             {LINES.map((l) => (
               <div key={l.title}>
                 <b>
@@ -86,16 +86,16 @@ export function WhatsAppDigest({
             ))}
           </div>
 
-          <div className="mt-2.5 text-[12.5px] font-semibold text-brand">
+          <div className="mt-2.5 text-xs font-semibold text-brand">
             👉 Voir les 7 événements : cotonou.events
           </div>
 
-          <div className="mt-2 text-[11.5px] text-[#667781]">
+          <div className="mt-2 text-2xs text-[#667781]">
             Pour vous désabonner, répondez STOP.
           </div>
 
           <div className="mt-1.5 flex items-center justify-end gap-1">
-            <span className="text-[11px] text-[#667781]">Ven. 18:00</span>
+            <span className="text-2xs text-[#667781]">Ven. 18:00</span>
 
             <CheckCheck
               className="h-[15px] w-[15px] text-[#34B7F1]"

@@ -45,7 +45,7 @@ interface NavProps {
 export function AdminSidebar({ tab, onTabChange, pendingCount }: NavProps) {
   return (
     <aside className="sticky top-0 hidden h-screen w-60 flex-none flex-col border-r border-gray-200 bg-white p-5 md:flex">
-      <div className="px-2.5 pb-[18px] pt-1.5 text-lg font-extrabold tracking-[-0.03em]">
+      <div className="px-2.5 pb-5 pt-1.5 text-lg font-extrabold tracking-display">
         cotonou<span className="text-brand">.events</span>
       </div>
 
@@ -55,7 +55,7 @@ export function AdminSidebar({ tab, onTabChange, pendingCount }: NavProps) {
             key={n.key}
             onClick={() => onTabChange(n.key)}
             className={cn(
-              "flex items-center gap-[11px] rounded-[10px] px-3 py-2.5 text-left text-sm font-semibold transition-colors",
+              "flex items-center gap-3 rounded-[10px] px-3 py-2.5 text-left text-sm font-semibold transition-colors",
               tab === n.key
                 ? "bg-[#F0FDF4] text-brand"
                 : "text-gray-700 hover:bg-gray-100",
@@ -66,7 +66,7 @@ export function AdminSidebar({ tab, onTabChange, pendingCount }: NavProps) {
             <span className="flex-1">{n.label}</span>
 
             {n.key === "pending" && pendingCount > 0 && (
-              <span className="flex h-5 min-w-[20px] items-center justify-center rounded-pill bg-red-500 px-1.5 text-[11px] font-bold text-white">
+              <span className="flex h-5 min-w-[20px] items-center justify-center rounded-pill bg-red-500 px-1.5 text-2xs font-bold text-white">
                 {pendingCount}
               </span>
             )}
@@ -77,7 +77,7 @@ export function AdminSidebar({ tab, onTabChange, pendingCount }: NavProps) {
       <form action={signOutAdmin} className="mt-auto">
         <button
           type="submit"
-          className="flex w-full items-center gap-[11px] rounded-[10px] px-3 py-2.5 text-left text-sm font-semibold text-gray-500 hover:bg-gray-100"
+          className="flex w-full items-center gap-3 rounded-[10px] px-3 py-2.5 text-left text-sm font-semibold text-gray-500 hover:bg-gray-100"
         >
           <LogOut className="h-[18px] w-[18px]" aria-hidden /> Déconnexion
         </button>
@@ -96,15 +96,15 @@ export function AdminMobileNav({ tab, onTabChange, pendingCount }: NavProps) {
             onClick={() => onTabChange(n.key)}
             className={cn(
               "relative flex flex-1 flex-col items-center gap-0.5 px-0.5 py-1.5",
-              tab === n.key ? "text-brand" : "text-gray-400",
+              tab === n.key ? "text-brand" : "text-gray-500",
             )}
           >
             <n.Icon className="h-5 w-5" aria-hidden />
 
-            <span className="text-[9.5px] font-semibold">{n.short}</span>
+            <span className="text-2xs font-semibold">{n.short}</span>
 
             {n.key === "pending" && pendingCount > 0 && (
-              <span className="absolute right-[18%] top-0.5 flex h-[15px] min-w-[15px] items-center justify-center rounded-pill bg-red-500 px-1 text-[9px] font-bold text-white">
+              <span className="absolute right-[18%] top-0.5 flex h-[15px] min-w-[15px] items-center justify-center rounded-pill bg-red-500 px-1 text-2xs font-bold text-white">
                 {pendingCount}
               </span>
             )}

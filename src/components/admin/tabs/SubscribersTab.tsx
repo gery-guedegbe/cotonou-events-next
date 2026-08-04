@@ -35,23 +35,23 @@ export function SubscribersTab({ subscribers }: { subscribers: Subscriber[] }) {
 
   return (
     <>
-      <div className="mb-[18px] grid gap-4 sm:grid-cols-3">
-        <div className="rounded-2xl border border-gray-200 bg-white p-[18px]">
-          <div className="text-[13px] text-gray-500">Abonnés actifs</div>
+      <div className="mb-5 grid gap-4 sm:grid-cols-3">
+        <div className="rounded-2xl border border-gray-200 bg-white p-5">
+          <div className="text-sm text-gray-500">Abonnés actifs</div>
 
-          <div className="mt-1.5 text-[26px] font-extrabold">{active}</div>
+          <div className="mt-1.5 text-2xl font-extrabold">{active}</div>
         </div>
 
-        <div className="rounded-2xl border border-gray-200 bg-white p-[18px]">
-          <div className="text-[13px] text-gray-500">Désabonnés (STOP)</div>
+        <div className="rounded-2xl border border-gray-200 bg-white p-5">
+          <div className="text-sm text-gray-500">Désabonnés (STOP)</div>
 
-          <div className="mt-1.5 text-[26px] font-extrabold">{inactive}</div>
+          <div className="mt-1.5 text-2xl font-extrabold">{inactive}</div>
         </div>
 
-        <div className="rounded-2xl border border-gray-200 bg-white p-[18px]">
-          <div className="text-[13px] text-gray-500">Taux de rétention</div>
+        <div className="rounded-2xl border border-gray-200 bg-white p-5">
+          <div className="text-sm text-gray-500">Taux de rétention</div>
 
-          <div className="mt-1.5 text-[26px] font-extrabold text-brand">
+          <div className="mt-1.5 text-2xl font-extrabold text-brand">
             {retention}%
           </div>
         </div>
@@ -64,7 +64,7 @@ export function SubscribersTab({ subscribers }: { subscribers: Subscriber[] }) {
       </div>
 
       {subscribers.length === 0 ? (
-        <div className="py-20 text-center text-sm text-gray-400">
+        <div className="py-20 text-center text-sm text-gray-500">
           Aucun abonné pour l&apos;instant.
         </div>
       ) : (
@@ -82,7 +82,7 @@ export function SubscribersTab({ subscribers }: { subscribers: Subscriber[] }) {
                   ].map((h) => (
                     <th
                       key={h}
-                      className="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-[0.05em] text-gray-400"
+                      className="px-4 py-3 text-left text-2xs font-bold uppercase tracking-label text-gray-500"
                     >
                       {h}
                     </th>
@@ -93,26 +93,26 @@ export function SubscribersTab({ subscribers }: { subscribers: Subscriber[] }) {
               <tbody>
                 {subscribers.map((s) => (
                   <tr key={s.id} className="border-t border-gray-100">
-                    <td className="px-4 py-3.5 font-mono text-[13px] text-gray-700">
+                    <td className="px-4 py-3.5 font-mono text-sm text-gray-700">
                       {s.phone}
                     </td>
 
-                    <td className="px-4 py-3.5 text-[13.5px] font-semibold text-gray-900">
+                    <td className="px-4 py-3.5 text-sm font-semibold text-gray-900">
                       {s.prenom}
                     </td>
 
-                    <td className="px-4 py-3.5 text-[13px] text-gray-500">
+                    <td className="px-4 py-3.5 text-sm text-gray-500">
                       {s.categories.join(", ")}
                     </td>
 
-                    <td className="whitespace-nowrap px-4 py-3.5 text-[13px] text-gray-500">
+                    <td className="whitespace-nowrap px-4 py-3.5 text-sm text-gray-500">
                       {s.date}
                     </td>
 
                     <td className="px-4 py-3.5">
                       <span
                         className={cn(
-                          "rounded-pill px-2.5 py-1 text-[11px] font-bold",
+                          "rounded-pill px-2.5 py-1 text-2xs font-bold",
                           s.active
                             ? "bg-brand-light text-brand-fg"
                             : "bg-gray-100 text-gray-500",

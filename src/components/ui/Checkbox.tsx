@@ -8,6 +8,12 @@ interface CheckboxProps {
   onChange: (checked: boolean) => void;
   /** "square" (cases à cocher) ou "round" (radios). */
   shape?: "square" | "round";
+  /**
+   * Nom du groupe. Obligatoire pour les radios : sans lui, chaque bouton forme
+   * son propre groupe, la navigation aux flèches est impossible et les lecteurs
+   * d'écran annoncent "1 sur 1" pour chaque option.
+   */
+  name?: string;
   children?: React.ReactNode;
   className?: string;
 }
@@ -16,6 +22,7 @@ export function Checkbox({
   checked,
   onChange,
   shape = "square",
+  name,
   children,
   className,
 }: CheckboxProps) {
@@ -53,6 +60,7 @@ export function Checkbox({
 
       <input
         type={shape === "square" ? "checkbox" : "radio"}
+        name={name}
         checked={checked}
         onChange={(e) => onChange(e.target.checked)}
         className="sr-only"

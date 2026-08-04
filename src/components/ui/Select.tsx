@@ -28,8 +28,8 @@ export function Select({
         aria-invalid={!!error}
         onBlur={() => setTouched(true)}
         className={cn(
-          "h-11 w-full appearance-none rounded-lg border-[1.5px] border-gray-200 bg-white px-3 pr-10 text-[15px] outline-none focus:border-brand",
-          isPlaceholder ? "text-gray-400" : "text-gray-900",
+          "h-11 w-full appearance-none rounded-lg border-[1.5px] border-gray-200 bg-white px-3 pr-10 text-base outline-none focus:border-brand",
+          isPlaceholder ? "text-gray-500" : "text-gray-900",
           error && touched && "border-red-500",
           className,
         )}
@@ -44,7 +44,7 @@ export function Select({
       </select>
 
       <ChevronDown
-        className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
+        className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500"
         aria-hidden
       />
     </div>

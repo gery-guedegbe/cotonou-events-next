@@ -14,16 +14,16 @@ export function SubmitEventStepIndicator({ step }: { step: number }) {
             <div className="flex items-center gap-2">
               <div
                 className={cn(
-                  "flex h-[30px] w-[30px] items-center justify-center rounded-full border-[1.5px] text-[13px] font-bold",
+                  "flex h-[30px] w-[30px] items-center justify-center rounded-full border-[1.5px] text-sm font-bold",
                   active && "border-brand bg-brand text-white",
                   done && "border-brand-light bg-brand-light text-brand",
-                  !active && !done && "border-gray-200 bg-white text-gray-400",
+                  !active && !done && "border-gray-200 bg-white text-gray-500",
                 )}
               >
                 {done ? "✓" : n}
               </div>
 
-              <span className={cn("text-[13.5px] font-semibold", active || done ? "text-gray-900" : "text-gray-400")}>
+              <span className={cn("text-sm font-semibold", active || done ? "text-gray-900" : "text-gray-500")}>
                 {name}
               </span>
             </div>

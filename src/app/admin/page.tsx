@@ -6,7 +6,7 @@ import {
   getRecentSubmissions,
   getAdminSubscribersData,
 } from "@/lib/supabase/admin";
-import { isWeekend, toBeninDateKey } from "@/lib/utils/format-date";
+import { isUpcomingWeekend } from "@/lib/utils/format-date";
 import { AdminDashboard } from "@/components/admin/AdminDashboard";
 
 export default async function AdminPage() {
@@ -22,8 +22,9 @@ export default async function AdminPage() {
   ]);
 
   const published = allEvents.filter((e) => e.statut === "publie");
-  const todayKey = toBeninDateKey(new Date().toISOString());
-  const weekendCount = published.filter((e) => e.date >= todayKey && isWeekend(e.date)).length;
+  // isUpcomingWeekend borne déjà la fenêtre au week-end qui arrive, donc plus
+  // besoin de comparer à la date du jour séparément.
+  const weekendCount = published.filter((e) => isUpcomingWeekend(e.date)).length;
   const activeSubscribers = subscribers.filter((s) => s.active).length;
 
   return (

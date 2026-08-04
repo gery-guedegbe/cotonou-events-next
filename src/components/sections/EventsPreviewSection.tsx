@@ -2,11 +2,12 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, CalendarSearch } from "lucide-react";
 import type { CategoryName, CotonouEvent } from "@/lib/types/event.types";
 import { EventCard } from "@/components/events/EventCard";
 import { SearchBar } from "@/components/events/SearchBar";
 import { CategoryChip } from "@/components/events/CategoryChip";
+import { EmptyState } from "@/components/ui/EmptyState";
 
 const CHIPS: (CategoryName | "Tous")[] = [
   "Tous",
@@ -38,7 +39,7 @@ export function EventsPreviewSection({ events }: { events: CotonouEvent[] }) {
       <div className="mx-auto max-w-container px-5">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <h2 className="text-[30px] font-extrabold tracking-[-0.03em] text-gray-900">
+            <h2 className="text-3xl font-extrabold tracking-display text-gray-900">
               Événements à venir à Cotonou
             </h2>
 
@@ -63,11 +64,31 @@ export function EventsPreviewSection({ events }: { events: CotonouEvent[] }) {
           ))}
         </div>
 
-        <div className="mt-7 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {visible.map((e) => (
-            <EventCard key={e.id} event={e} />
-          ))}
-        </div>
+        {visible.length === 0 ? (
+          <EmptyState
+            className="mt-7"
+            icon={CalendarSearch}
+            title="Rien dans cette catégorie pour l'instant"
+            description="Aucun événement à venir ne correspond. Les autres catégories en ont peut-être."
+            action={
+              <button
+                onClick={() => {
+                  setActive("Tous");
+                  setQuery("");
+                }}
+                className="rounded-pill bg-brand px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-hover"
+              >
+                Voir toutes les catégories
+              </button>
+            }
+          />
+        ) : (
+          <div className="mt-7 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {visible.map((e) => (
+              <EventCard key={e.id} event={e} />
+            ))}
+          </div>
+        )}
 
         <div className="mt-10 text-center">
           <Link

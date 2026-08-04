@@ -27,7 +27,7 @@ export const LEGAL_DOCS = {
         body: "Vous disposez d'un droit d'accès, de rectification, de suppression et de portabilité de vos données. Pour l'exercer, contactez-nous ou répondez directement sur WhatsApp.",
       },
       {
-        h: "Contact DPO",
+        h: "Nous contacter à propos de vos données",
         body: "Pour toute question relative à vos données, écrivez à privacy@cotonou.events.",
       },
       {
@@ -51,7 +51,7 @@ export const LEGAL_DOCS = {
       },
       {
         h: "Soumission d'événements",
-        body: "Les événements soumis doivent être réels, publics et se dérouler à Cotonou. Chaque soumission est vérifiée manuellement sous 24h. Les fausses soumissions entraînent un bannissement.",
+        body: "Les événements soumis doivent être réels, publics et se dérouler à Cotonou. Ils sont mis en ligne dès l'envoi du formulaire. Nous retirons sans préavis toute soumission fausse ou trompeuse, et pouvons bloquer son auteur.",
       },
       {
         h: "Responsabilités",
@@ -96,21 +96,21 @@ export const LEGAL_DOCS = {
       },
       {
         h: "Notre solution",
-        body: "Un seul message WhatsApp chaque vendredi à 18h, avec les 7 meilleurs événements du week-end. Gratuit, sans application, sans compte à créer.",
+        body: "Un seul message WhatsApp chaque vendredi à 18h, avec les 7 meilleurs événements du week-end. Rien à installer, aucun compte à créer.",
       },
       {
-        h: "L'équipe",
-        body: "Une petite équipe de Cotonouens passionnés par leur ville et sa scène culturelle, sportive et entrepreneuriale.",
+        h: "Qui est derrière",
+        body: "Un projet indépendant monté à Cotonou par une seule personne, qui en avait assez de rater les bons plans faute d'être au courant.",
       },
       {
         h: "Contact",
-        body: "Une idée, un partenariat, un bug à signaler ? Écrivez à contact@cotonou.events",
+        body: "Écrivez à contact@cotonou.events. Les retours sur un événement inexact sont particulièrement utiles.",
       },
     ],
   },
   cookies: {
     title: "Gestion des cookies",
-    intro: "Nous croyons en une approche minimaliste des cookies.",
+    intro: "Ce site dépose le strict minimum : aucun cookie publicitaire, aucun traceur tiers.",
     sections: [
       {
         h: "Cookies essentiels",
@@ -118,7 +118,7 @@ export const LEGAL_DOCS = {
       },
       {
         h: "Pas de traçage",
-        body: "Aucun cookie publicitaire, aucun pixel de réseau social, aucun traceur tiers n'est déposé sur votre appareil.",
+        body: "Aucun traceur publicitaire ni pixel de réseau social n'est déposé sur votre appareil.",
       },
       {
         h: "Gérer vos préférences",
@@ -129,7 +129,7 @@ export const LEGAL_DOCS = {
   contact: {
     title: "Contact",
     intro:
-      "Une question, une suggestion, un partenariat ? Nous sommes à votre écoute.",
+      "Voici comment joindre le projet, selon ce que vous cherchez.",
     sections: [
       {
         h: "Par email",
@@ -148,7 +148,7 @@ export const LEGAL_DOCS = {
   signaler: {
     title: "Signaler un problème",
     intro:
-      "Un événement erroné, un lien cassé, un comportement abusif ? Aidez-nous à garder la plateforme fiable.",
+      "Les événements sont publiés automatiquement, donc des erreurs passent. Les signaler est le moyen le plus direct de garder le catalogue fiable.",
     sections: [
       {
         h: "Événement incorrect",

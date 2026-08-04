@@ -31,7 +31,7 @@ export const PhoneInput = forwardRef<HTMLInputElement, PhoneInputProps>(
       >
         <div
           className={cn(
-            "flex items-center gap-1.5 whitespace-nowrap border-r px-3 text-[15px]",
+            "flex items-center gap-1.5 whitespace-nowrap border-r px-3 text-base",
             dark
               ? "border-white/15 bg-white/[0.06] text-white/80"
               : "border-gray-200 bg-gray-50 text-gray-700",
@@ -47,10 +47,10 @@ export const PhoneInput = forwardRef<HTMLInputElement, PhoneInputProps>(
           inputMode="numeric"
           placeholder="01 XX XX XX XX"
           className={cn(
-            "min-w-0 flex-1 border-0 bg-transparent px-3 text-[15px] outline-none",
+            "min-w-0 flex-1 border-0 bg-transparent px-3 text-base outline-none",
             dark
-              ? "text-white placeholder:text-white/40"
-              : "text-gray-900 placeholder:text-gray-400",
+              ? "text-white placeholder:text-white/70"
+              : "text-gray-900 placeholder:text-gray-500",
           )}
           {...props}
         />

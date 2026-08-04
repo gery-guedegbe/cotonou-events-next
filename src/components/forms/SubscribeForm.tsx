@@ -3,11 +3,12 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import Link from "next/link";
 import { Shield } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import {
-  subscribeSchema,
-  type SubscribeInput,
+  inlineSubscribeSchema,
+  type InlineSubscribeInput,
   type SubscribeValues,
 } from "@/lib/validations/subscribe.schema";
 import { subscribeToAlerts } from "@/lib/actions/subscribers";
@@ -38,13 +39,14 @@ export function SubscribeForm({
     watch,
     reset,
     formState: { errors },
-  } = useForm<SubscribeInput>({
-    resolver: zodResolver(subscribeSchema),
+  } = useForm<InlineSubscribeInput>({
+    resolver: zodResolver(inlineSubscribeSchema),
+    // Validation au blur, conformément à la convention du projet.
+    mode: "onBlur",
     defaultValues: {
       prenom: "",
       phone: "",
       categories: [],
-      consent: true as const,
     },
   });
 
@@ -84,7 +86,7 @@ export function SubscribeForm({
             className={cn(
               "h-12",
               dark &&
-                "border-white/15 bg-white/[0.08] text-white placeholder:text-white/40 focus:border-brand focus:shadow-none",
+                "border-white/15 bg-white/[0.08] text-white placeholder:text-white/70 focus:border-brand focus:shadow-none",
             )}
           />
         </div>
@@ -98,13 +100,6 @@ export function SubscribeForm({
           />
         </div>
 
-        {/* 
-        <PhoneInput
-          {...register("phone")}
-          value={phone}
-          dark={dark}
-          className="h-12"
-        /> */}
       </div>
 
       <Button type="submit" size="lg" loading={loading}>
@@ -117,15 +112,33 @@ export function SubscribeForm({
         </FieldError>
       )}
 
-      {!dark && (
-        <div className="flex items-center gap-[7px] text-xs text-gray-400">
-          <Shield className="h-3.5 w-3.5 flex-none" aria-hidden />
-          <span>
-            Votre numéro n&apos;est jamais partagé · Répondez STOP pour vous
-            désabonner à tout moment.
-          </span>
-        </div>
-      )}
+      {/* Mention de consentement, affichée dans les deux thèmes. Elle porte
+          la portée de l'engagement au point exact où le visiteur agit : sans
+          elle, l'inscription se faisait sans qu'il ait rien accepté. */}
+      <p
+        className={cn(
+          "flex items-start gap-2 text-xs",
+          dark ? "text-white/75" : "text-gray-600",
+        )}
+      >
+        <Shield className="mt-0.5 h-3.5 w-3.5 flex-none" aria-hidden />
+
+        <span>
+          En vous inscrivant, vous acceptez de recevoir un message WhatsApp par
+          semaine. Répondez STOP pour arrêter. Votre numéro n&apos;est jamais
+          partagé —{" "}
+          <Link
+            href="/politique-de-confidentialite"
+            className={cn(
+              "underline underline-offset-2",
+              dark ? "text-white" : "text-gray-900",
+            )}
+          >
+            politique de confidentialité
+          </Link>
+          .
+        </span>
+      </p>
     </form>
   );
 }

@@ -23,7 +23,7 @@ export function SubmitEventStep2({
   setValue,
 }: SubmitEventStep2Props) {
   return (
-    <div className="flex flex-col gap-[22px]">
+    <div className="flex flex-col gap-6">
       <div className="grid grid-cols-2 gap-3.5">
         <div>
           <FieldLabel htmlFor="dateStart">Date de début *</FieldLabel>

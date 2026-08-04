@@ -2,7 +2,7 @@
 export function SubscribersChart({ trend }: { trend: number[] }) {
   if (trend.length < 2 || trend.every((v) => v === 0)) {
     return (
-      <div className="flex h-[170px] items-center justify-center text-sm text-gray-400">
+      <div className="flex h-[170px] items-center justify-center text-sm text-gray-500">
         Pas encore assez de données.
       </div>
     );

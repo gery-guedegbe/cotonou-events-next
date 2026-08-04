@@ -3,6 +3,9 @@ import { getPublishedEvents } from "@/lib/supabase/events";
 
 const BASE_URL = "https://cotonou.events";
 
+/** Pages dont le contenu dépend du catalogue d'événements. */
+const DYNAMIC_PATHS = new Set(["/", "/evenements"]);
+
 const STATIC_ROUTES: {
   path: string;
   priority: number;
@@ -26,16 +29,31 @@ const STATIC_ROUTES: {
 ];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const events = await getPublishedEvents();
+  const now = new Date();
+
+  // Les pages de liste changent dès qu'un événement entre en base : leur
+  // fraîcheur suit donc la dernière insertion, pas la date du jour.
+  const lastInsert = events.reduce<Date>((latest, event) => {
+    if (!event.createdAt) return latest;
+    const created = new Date(event.createdAt);
+    return created > latest ? created : latest;
+  }, new Date(0));
+  const catalogueUpdatedAt = lastInsert.getTime() ? lastInsert : now;
+
   const staticEntries = STATIC_ROUTES.map((route) => ({
     url: `${BASE_URL}${route.path}`,
+    lastModified: DYNAMIC_PATHS.has(route.path) ? catalogueUpdatedAt : now,
     changeFrequency: route.changeFrequency,
     priority: route.priority,
   }));
 
-  const events = await getPublishedEvents();
   const eventEntries = events.map((event) => ({
     url: `${BASE_URL}/evenements/${event.id}`,
-    lastModified: event.date,
+    // Date d'insertion, pas date de l'événement. `event.date` est par
+    // construction dans le futur : un lastModified postérieur à aujourd'hui
+    // est invalide et jette le doute sur tout le sitemap.
+    lastModified: event.createdAt ? new Date(event.createdAt) : now,
     changeFrequency: "weekly" as const,
     priority: 0.8,
   }));

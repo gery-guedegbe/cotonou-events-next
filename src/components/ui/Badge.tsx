@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils/cn";
 import { CATEGORIES } from "@/lib/constants/categories";
-import type { CategoryName } from "@/lib/types/event.types";
-import { formatPrice } from "@/lib/utils/format-date";
+import type { CategoryName, PriceType } from "@/lib/types/event.types";
+import { formatEventPrice } from "@/lib/utils/format-date";
 
 export function CategoryBadge({
   category,
@@ -14,7 +14,7 @@ export function CategoryBadge({
   return (
     <span
       className={cn(
-        "inline-flex rounded-pill px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.06em]",
+        "inline-flex rounded-pill px-2.5 py-1 text-2xs font-bold uppercase tracking-label",
         className,
       )}
       style={{ background: c.bg, color: c.text }}
@@ -25,22 +25,24 @@ export function CategoryBadge({
 }
 
 export function PriceBadge({
-  price,
+  priceType,
+  amount,
   className,
 }: {
-  price: number;
+  priceType: PriceType;
+  amount: number | null;
   className?: string;
 }) {
-  const free = price === 0;
+  const free = priceType === "gratuit";
   return (
     <span
       className={cn(
-        "inline-flex rounded-pill px-2.5 py-1 text-[11.5px] font-bold",
+        "inline-flex rounded-pill px-2.5 py-1 text-2xs font-bold",
         free ? "bg-brand-light text-brand-fg" : "bg-gray-100 text-gray-700",
         className,
       )}
     >
-      {formatPrice(price)}
+      {formatEventPrice(priceType, amount)}
     </span>
   );
 }

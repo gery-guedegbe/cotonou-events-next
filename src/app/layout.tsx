@@ -1,18 +1,20 @@
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans, JetBrains_Mono } from "next/font/google";
+import { Plus_Jakarta_Sans } from "next/font/google";
+import {
+  organizationSchema,
+  websiteSchema,
+  jsonLdString,
+} from "@/lib/seo/schema";
 import "./globals.css";
 
+// JetBrains Mono ne sert qu'à deux tableaux du dashboard admin. Elle est
+// chargée dans app/admin/layout.tsx, pas ici : la charger globalement
+// imposait un téléchargement de police à chaque visiteur du site public
+// pour un rendu qu'aucune page publique n'utilise.
 const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700", "800"],
   variable: "--font-jakarta",
-  display: "swap",
-});
-
-const mono = JetBrains_Mono({
-  subsets: ["latin"],
-  weight: ["400", "500"],
-  variable: "--font-mono",
   display: "swap",
 });
 
@@ -46,13 +48,9 @@ export const metadata: Metadata = {
   },
 };
 
-const jsonLd = {
-  "@context": "https://schema.org",
-  "@type": "WebSite",
-  name: SITE_NAME,
-  url: "https://cotonou.events",
-  description: SITE_DESCRIPTION,
-};
+// L'organisation manquait : sans elle, aucune entité éditrice n'était
+// déclarée, et les moteurs génératifs n'avaient rien à citer comme source.
+const jsonLd = [organizationSchema(), websiteSchema()];
 
 export default function RootLayout({
   children,
@@ -60,11 +58,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="fr" className={`${jakarta.variable} ${mono.variable}`}>
+    <html lang="fr" className={jakarta.variable}>
       <body>
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          dangerouslySetInnerHTML={{ __html: jsonLdString(jsonLd) }}
         />
 
         <a

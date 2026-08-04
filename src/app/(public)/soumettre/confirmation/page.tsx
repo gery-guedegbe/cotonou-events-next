@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/Button";
 
 export default function ConfirmationPage() {
   return (
-    <div className="mx-auto max-w-[680px] px-5 pb-[72px] pt-10">
+    <div className="mx-auto max-w-[680px] px-5 pb-20 pt-10">
       <div className="rounded-2xl border border-gray-200 bg-white px-7 py-14 text-center shadow-card">
         <motion.div
           initial={{ scale: 0, opacity: 0 }}
@@ -18,13 +18,13 @@ export default function ConfirmationPage() {
           <CheckCircle2 className="h-12 w-12 text-brand" aria-hidden />
         </motion.div>
 
-        <h2 className="mt-6 text-2xl font-extrabold tracking-[-0.02em] text-gray-900">
-          Votre événement est bien reçu
+        <h2 className="mt-6 text-2xl font-extrabold tracking-title text-gray-900">
+          Votre événement est en ligne
         </h2>
 
-        <p className="mx-auto mt-3 max-w-[380px] text-[15px] leading-relaxed text-gray-500">
-          Il sera vérifié et publié dans les 24h. Vous recevrez une confirmation
-          par WhatsApp ou email.
+        <p className="mx-auto mt-3 max-w-[380px] text-base leading-relaxed text-gray-500">
+          Il apparaît dès maintenant dans la liste des événements, et sera repris
+          dans l&apos;alerte WhatsApp du vendredi s&apos;il a lieu le week-end.
         </p>
 
         <div className="mt-7 flex flex-wrap justify-center gap-3">

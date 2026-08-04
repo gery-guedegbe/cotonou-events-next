@@ -50,7 +50,7 @@ export function Navbar() {
               key={l.href}
               href={l.href}
               className={cn(
-                "text-[14.5px] font-medium transition-colors hover:text-brand",
+                "text-sm font-medium transition-colors hover:text-brand",
                 pathname === l.href ? "text-brand" : "text-gray-700",
               )}
             >
@@ -62,7 +62,7 @@ export function Navbar() {
         <div className="flex items-center gap-2.5">
           <Link
             href="/alertes"
-            className="hidden items-center rounded-pill bg-brand px-[18px] py-[9px] text-[13.5px] font-semibold text-white transition-colors hover:bg-brand-hover md:inline-flex"
+            className="hidden items-center rounded-pill bg-brand px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-hover md:inline-flex"
           >
             Recevoir les alertes
           </Link>
@@ -70,7 +70,7 @@ export function Navbar() {
           <button
             onClick={() => setOpen(true)}
             aria-label="Ouvrir le menu"
-            className="flex h-10 w-10 items-center justify-center rounded-lg text-gray-900 hover:bg-gray-100 md:hidden"
+            className="flex h-11 w-11 items-center justify-center rounded-lg text-gray-900 hover:bg-gray-100 md:hidden"
           >
             <Menu className="h-6 w-6" aria-hidden />
           </button>
@@ -101,7 +101,7 @@ export function Navbar() {
                 <button
                   onClick={() => setOpen(false)}
                   aria-label="Fermer le menu"
-                  className="flex h-10 w-10 items-center justify-center rounded-lg text-gray-900 hover:bg-gray-100"
+                  className="flex h-11 w-11 items-center justify-center rounded-lg text-gray-900 hover:bg-gray-100"
                 >
                   <X className="h-6 w-6" aria-hidden />
                 </button>
@@ -119,7 +119,7 @@ export function Navbar() {
 
               <Link
                 href="/alertes"
-                className="mt-3 rounded-pill bg-brand py-3 text-center text-[15px] font-semibold text-white"
+                className="mt-3 rounded-pill bg-brand py-3 text-center text-base font-semibold text-white"
               >
                 Recevoir les alertes
               </Link>

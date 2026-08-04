@@ -1,119 +1,241 @@
 # Cotonou.events
 
-Plateforme web de découverte d'événements à Cotonou (Bénin), avec pour
-fonctionnalité différenciante une alerte WhatsApp hebdomadaire personnalisée
-envoyée chaque vendredi à 18h.
+Cotonou.events est une plateforme web de découverte d’événements à Cotonou, au Bénin.
 
-<!-- TODO: captures d'écran (landing, liste, fiche événement, formulaire) -->
+Elle centralise des événements habituellement dispersés entre Facebook, les groupes WhatsApp et les médias locaux. Les utilisateurs peuvent consulter les événements disponibles et recevoir chaque vendredi une sélection personnalisée via WhatsApp.
 
-> Le contexte complet du projet (décisions d'architecture, périmètre V1,
-> conventions de code, schéma de données) vit dans [CLAUDE.md](CLAUDE.md).
-> Ce README couvre uniquement la prise en main.
+## Fonctionnalités
 
-## Stack
+- Consultation des événements publiés
+- Recherche par mot-clé
+- Filtres par catégorie, date, prix et quartier
+- Page détaillée pour chaque événement
+- Soumission d’événements par les organisateurs
+- Upload et stockage des affiches
+- Inscription aux alertes WhatsApp
+- Collecte automatique d’événements Facebook avec Apify
+- Normalisation, filtrage et déduplication des données collectées
+- Modération des événements
+- Dashboard d’administration
+- Envoi automatique d’un digest WhatsApp hebdomadaire
+- Gestion des commandes WhatsApp `STOP` et `START`
+- Monitoring des workflows d’automatisation
+- SEO technique et données structurées
 
-| Domaine                  | Outil                                                                  |
-| ------------------------ | ---------------------------------------------------------------------- |
-| Framework                | Next.js 16 (App Router, TypeScript strict)                             |
-| Styles                   | Tailwind CSS — composants UI custom (pas de librairie type shadcn/MUI) |
-| Animations               | `motion` (`motion/react`)                                              |
-| Icônes                   | `lucide-react`                                                         |
-| Formulaires              | React Hook Form + Zod                                                  |
-| Base de données          | Supabase (PostgreSQL, Auth, Storage)                                   |
-| Automatisation (à venir) | n8n (Railway) + Apify (scraping) + Meta WhatsApp Cloud API             |
+## Statut
+
+La V1 est entièrement implémentée et testée.
+
+Le site public, les formulaires, le dashboard d’administration, les workflows n8n, la collecte Apify et les automatisations WhatsApp sont opérationnels.
+
+Le projet est prêt pour le déploiement en production.
+
+## Architecture
+
+```text
+Next.js
+├── Site public
+├── Formulaires
+├── Dashboard admin
+└── Server Actions
+        │
+        ├── Supabase
+        │   ├── PostgreSQL
+        │   ├── Auth
+        │   └── Storage
+        │
+        └── n8n
+            ├── Apify
+            ├── Meta WhatsApp Cloud API
+            └── Monitoring
+```
+
+Next.js gère l’interface utilisateur, le rendu des pages et les mutations ponctuelles via les Server Actions.
+
+Supabase fournit la base PostgreSQL, l’authentification du dashboard admin et le stockage des images.
+
+n8n orchestre les traitements planifiés et événementiels : collecte des événements, traitement des soumissions, envoi des alertes WhatsApp et monitoring.
+
+Aucun backend Node.js ou Express supplémentaire n’est utilisé.
+
+## Stack technique
+
+- Next.js 16 avec App Router
+- TypeScript en mode strict
+- Tailwind CSS
+- Motion
+- React Hook Form
+- Zod
+- Supabase
+- n8n auto-hébergé sur Railway
+- Apify
+- Meta WhatsApp Business Cloud API
+- Vercel
+
+Les composants d’interface sont développés sur mesure, sans bibliothèque de composants externe.
 
 ## Prérequis
 
-Node.js ≥ 20.9 (exigé par Next.js 16, voir le champ `engines` de `package.json`).
+- Node.js 20.9 ou supérieur
+- npm
+- Un projet Supabase
+- Une instance n8n
+- Un compte Apify
+- Une application Meta configurée pour WhatsApp Business Cloud API
 
-## Démarrage
+## Installation
+
+Clone le dépôt et installe les dépendances :
 
 ```bash
+git clone <repository-url>
+cd cotonou-events
 npm install
-cp .env.example .env.local   # renseigner les clés Supabase, voir ci-dessous
-npm run dev
-# → http://localhost:3000
 ```
 
-Autres commandes : `npm run build`, `npm run start`, `npm run lint`,
-`npx tsc --noEmit`.
+Crée le fichier d’environnement local :
 
-Pas de suite de tests automatisés pour l'instant : la vérification se fait via
-`tsc`, `eslint` et un passage manuel dans le navigateur.
+```bash
+cp .env.example .env.local
+```
+
+Configure les variables suivantes :
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+```
+
+Démarre le serveur de développement :
+
+```bash
+npm run dev
+```
+
+L’application est accessible à l’adresse suivante :
+
+```text
+http://localhost:3000
+```
 
 ## Base de données
 
-Le projet est branché sur un vrai projet Supabase (pas de mock côté lecture
-ni écriture).
+Crée un projet Supabase, puis exécute les scripts SQL dans l’ordre :
 
-1. Crée un projet sur [supabase.com](https://supabase.com).
-2. Dans l'éditeur SQL Supabase, exécute dans l'ordre :
-   - [supabase/schema.sql](supabase/schema.sql) — tables, contraintes, RLS,
-     bucket Storage. **Idempotent**, peut être réexécuté sans risque après
-     chaque mise à jour de ce fichier.
-   - [supabase/seed.sql](supabase/seed.sql) — données de démonstration.
-     **À lancer une seule fois** (pas de garde anti-doublon).
-3. Renseigne `.env.local` à partir de `.env.example` avec les clés du projet
-   (Settings → API) : `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`,
-   `SUPABASE_SERVICE_ROLE_KEY`.
+```text
+supabase/schema.sql
+supabase/seed.sql
+```
 
-`SUPABASE_SERVICE_ROLE_KEY` ne doit jamais être exposée côté client : elle
-n'est utilisée que dans les Server Actions (`src/lib/actions/`), jamais dans
-un composant `"use client"`.
+Le script `seed.sql` ajoute les données de démonstration et ne doit être exécuté qu’une seule fois.
 
-## État actuel
+La clé `SUPABASE_SERVICE_ROLE_KEY` doit rester exclusivement côté serveur. Elle ne doit jamais être exposée dans une variable préfixée par `NEXT_PUBLIC_`.
 
-| Fonctionnalité                                                     | Statut                                          |
-| ------------------------------------------------------------------ | ----------------------------------------------- |
-| Site public (liste, recherche, filtres, détail) lu depuis Supabase | ✅                                              |
-| Formulaire de soumission d'événement (+ upload image)              | ✅                                              |
-| Inscription aux alertes WhatsApp (formulaire rapide + complet)     | ✅                                              |
-| Dashboard admin                                                    | ⏳ encore sur données mockées (`src/lib/data/`) |
-| Scraping Apify → Supabase                                          | ⏳ non démarré                                  |
-| Envoi WhatsApp (digest vendredi, STOP/START)                       | ⏳ non démarré                                  |
+Les tokens Apify et Meta WhatsApp sont stockés dans les credentials n8n, et non dans l’environnement Next.js.
+
+## Automatisations
+
+Le projet utilise plusieurs workflows n8n indépendants :
+
+- collecte des événements Facebook via Apify ;
+- traitement des événements soumis depuis le site ;
+- envoi du digest WhatsApp chaque vendredi ;
+- gestion des commandes de désabonnement et de réabonnement ;
+- centralisation du monitoring et des erreurs.
+
+Supabase sert de source de données centrale entre le frontend et les workflows.
+
+## Commandes
+
+```bash
+npm run dev
+npm run build
+npm run lint
+npx tsc --noEmit
+```
+
+Avant tout déploiement, les commandes suivantes doivent réussir :
+
+```bash
+npm run build
+npm run lint
+npx tsc --noEmit
+```
+
+## Structure du projet
+
+```text
+src/
+├── app/
+│   ├── (public)/
+│   ├── admin/
+│   ├── llms.txt/
+│   ├── icon.tsx
+│   ├── opengraph-image.tsx
+│   ├── robots.ts
+│   └── sitemap.ts
+├── components/
+│   ├── admin/
+│   ├── events/
+│   ├── forms/
+│   ├── layout/
+│   ├── sections/
+│   ├── ui/
+│   └── whatsapp/
+└── lib/
+    ├── actions/
+    ├── constants/
+    ├── data/
+    ├── seo/
+    ├── supabase/
+    ├── types/
+    ├── utils/
+    └── validations/
+
+supabase/
+├── schema.sql
+└── seed.sql
+```
+
+## Sécurité
+
+- Les écritures publiques passent par des Server Actions ou des webhooks n8n sécurisés.
+- La clé Supabase `service_role` n’est jamais utilisée côté client.
+- Les tables sensibles sont protégées par Row Level Security.
+- Le dashboard admin est protégé par Supabase Auth.
+- Les secrets Apify et WhatsApp restent dans les credentials n8n.
+- Les formulaires sont validés côté client et côté serveur.
 
 ## Déploiement
 
-Hébergement prévu sur [Vercel](https://vercel.com) (connecté à ce dépôt) :
+Le frontend est prévu pour être déployé sur Vercel.
 
-1. Importer le dépôt dans Vercel.
-2. Renseigner les mêmes variables que `.env.local` (Settings → Environment
-   Variables) : `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`,
-   `SUPABASE_SERVICE_ROLE_KEY`.
-3. Déploiement automatique à chaque push sur `main`.
+Avant le déploiement :
 
-## Arborescence
+1. configure les variables d’environnement dans Vercel ;
+2. applique le schéma Supabase de production ;
+3. configure les credentials de production dans n8n ;
+4. active les URLs de production des webhooks ;
+5. configure le webhook Meta WhatsApp ;
+6. vérifie la timezone `Africa/Porto-Novo` dans n8n ;
+7. exécute les vérifications de build, de lint et de typage.
 
-```
-src/
-  app/
-    (public)/        # Site public : landing, liste, détail, soumettre, alertes, pages légales
-    admin/            # Dashboard protégé (Supabase Auth)
-    icon.tsx, opengraph-image.tsx, sitemap.ts, robots.ts
-  components/
-    ui/               # Composants custom réutilisables (Button, Input, PhoneInput, Toast, ...)
-    layout/ events/ forms/ sections/ admin/
-  lib/
-    actions/          # Server Actions ("use server") — écritures Supabase
-    supabase/         # Clients Supabase (anon pour lecture, service_role pour écriture)
-    types/ constants/ utils/ validations/
-    data/             # Données mockées restantes (dashboard admin uniquement)
-supabase/
-  schema.sql          # Schéma idempotent (tables, RLS, Storage)
-  seed.sql            # Données de démonstration (à lancer une fois)
+Le domaine prévu pour la production est :
+
+```text
+cotonouevents.tech
 ```
 
-## Conventions de code
+## Périmètre de la V1
 
-Détaillées dans [CLAUDE.md](CLAUDE.md) — résumé :
+La première version ne comprend pas :
 
-- Aucun fichier > 300 lignes (décomposer en sous-composants/hooks sinon).
-- Pas de librairie de composants UI : tout est custom dans `components/ui/`.
-- Tout formulaire utilise React Hook Form + Zod, validation au blur.
-- Mobile first (375px), accessibilité AA, focus visible, `aria-label` sur les
-  icônes seules.
-
-## Accessibilité
-
-Skip link, labels associés à tous les inputs, anneaux de focus visibles,
-contraste AA, respect de `prefers-reduced-motion`.
+- de comptes utilisateurs publics ;
+- d’application mobile native ;
+- de billetterie ou de paiement en ligne ;
+- de commentaires ou d’avis ;
+- de notifications push ;
+- de recommandations par intelligence artificielle ;
+- de scraping Instagram ;
+- de gestion avancée de plusieurs administrateurs.

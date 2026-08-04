@@ -127,7 +127,7 @@ export function SubmitEventForm() {
         />
       )}
 
-      <div className="mt-7 flex items-center justify-between gap-3 border-t border-gray-100 pt-[22px]">
+      <div className="mt-7 flex items-center justify-between gap-3 border-t border-gray-100 pt-6">
         {step > 1 ? (
           <Button
             type="button"

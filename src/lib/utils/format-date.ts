@@ -56,10 +56,71 @@ export function formatPrice(price: number): string {
   return price === 0 ? "Gratuit" : `${price.toLocaleString("fr-FR")} FCFA`;
 }
 
-/** Renvoie true le samedi/dimanche, pour le filtre "Ce week-end". */
-export function isWeekend(iso: string): boolean {
-  const day = new Date(`${iso}T00:00:00`).getDay();
-  return day === 0 || day === 6;
+/**
+ * Libellé de prix qui distingue la participation libre du tarif fixe.
+ * Sans cette distinction, un événement à donation s'affiche comme payant au
+ * tarif exact, ce qui est faux.
+ */
+export function formatEventPrice(
+  priceType: "gratuit" | "payant" | "donation",
+  amount: number | null,
+): string {
+  if (priceType === "gratuit") return "Gratuit";
+  const montant = amount ? `${amount.toLocaleString("fr-FR")} FCFA` : null;
+  if (priceType === "donation") {
+    return montant ? `Libre, dès ${montant}` : "Participation libre";
+  }
+  return montant ?? "Payant";
+}
+
+/**
+ * Fenêtre du week-end à venir, en clés de date Bénin.
+ *
+ * "Ce week-end" doit désigner le week-end qui arrive, pas n'importe quel
+ * samedi. Pendant le week-end lui-même, la fenêtre reste celle en cours pour
+ * qu'un événement du samedi ne disparaisse pas le samedi matin.
+ */
+export function getUpcomingWeekend(): { start: string; end: string } {
+  const today = beninToday();
+  const day = today.getUTCDay(); // 0 = dimanche, 6 = samedi
+
+  let fridayOffset: number;
+  if (day === 6) fridayOffset = -1; // samedi : le week-end a commencé hier
+  else if (day === 0) fridayOffset = -2; // dimanche : vendredi il y a 2 jours
+  else fridayOffset = 5 - day; // lundi..jeudi : prochain vendredi
+
+  return {
+    start: shiftDateKey(today, fridayOffset),
+    end: shiftDateKey(today, fridayOffset + 2),
+  };
+}
+
+/** Renvoie true si la date tombe dans le week-end à venir (vendredi à dimanche). */
+export function isUpcomingWeekend(iso: string): boolean {
+  const { start, end } = getUpcomingWeekend();
+  return iso >= start && iso <= end;
+}
+
+/** Renvoie true si la date tombe entre aujourd'hui et la fin de la semaine courante (dimanche). */
+export function isInCurrentWeek(iso: string): boolean {
+  const today = beninToday();
+  const day = today.getUTCDay();
+  const daysToSunday = day === 0 ? 0 : 7 - day;
+  return iso >= beninTodayKey() && iso <= shiftDateKey(today, daysToSunday);
+}
+
+/** Renvoie true si la date tombe entre aujourd'hui et la fin du mois courant. */
+export function isInCurrentMonth(iso: string): boolean {
+  const today = beninToday();
+  const endOfMonth = new Date(
+    Date.UTC(today.getUTCFullYear(), today.getUTCMonth() + 1, 0),
+  );
+  return iso >= beninTodayKey() && iso <= toDateKey(endOfMonth);
+}
+
+/** Renvoie true si la date est aujourd'hui ou plus tard (heure du Bénin). */
+export function isUpcoming(iso: string): boolean {
+  return iso >= beninTodayKey();
 }
 
 /** ("2025-05-17", "20h00") -> "2025-05-17T20:00:00+01:00" (UTC+1, sans DST au Bénin). Pour le JSON-LD Event. */
@@ -100,6 +161,44 @@ function getBeninParts(isoTimestamp: string) {
 export function toBeninDateKey(isoTimestamp: string): string {
   const { year, month, day } = getBeninParts(isoTimestamp);
   return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+}
+
+/** Date -> "2025-05-17" à partir des composantes UTC. */
+function toDateKey(d: Date): string {
+  return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}-${String(d.getUTCDate()).padStart(2, "0")}`;
+}
+
+/**
+ * Aujourd'hui au Bénin, normalisé à minuit UTC.
+ *
+ * On passe par les composantes calendaires béninoises plutôt que par l'heure
+ * locale du serveur : un rendu Vercel dans une autre région basculerait sinon
+ * d'un jour, et décalerait tous les filtres de date.
+ */
+function beninToday(): Date {
+  const { year, month, day } = getBeninParts(new Date().toISOString());
+  return new Date(Date.UTC(year, month - 1, day));
+}
+
+/** Décale une date de n jours et renvoie la clé "YYYY-MM-DD". */
+function shiftDateKey(base: Date, days: number): string {
+  const d = new Date(base);
+  d.setUTCDate(d.getUTCDate() + days);
+  return toDateKey(d);
+}
+
+/** Clé de date d'aujourd'hui au Bénin ("2025-05-17"). */
+export function beninTodayKey(): string {
+  return toDateKey(beninToday());
+}
+
+/**
+ * Début de la journée béninoise courante, en ISO UTC.
+ * Sert de plancher aux requêtes Supabase pour exclure les événements passés,
+ * tout en gardant visibles ceux qui ont lieu plus tard dans la journée.
+ */
+export function beninStartOfTodayISO(): string {
+  return `${beninTodayKey()}T00:00:00+01:00`;
 }
 
 /** Timestamptz -> "Sam 17 mai" (heure du Bénin), pour les cards d'événement. */

@@ -41,15 +41,15 @@ export default function AdminLoginPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 p-5">
       <div className="w-full max-w-[420px] rounded-[18px] border border-gray-200 bg-white px-8 py-9 shadow-[0_4px_24px_rgba(0,0,0,0.06)]">
-        <div className="text-center text-xl font-extrabold tracking-[-0.03em]">
+        <div className="text-center text-xl font-extrabold tracking-display">
           cotonou<span className="text-brand">.events</span>
         </div>
 
-        <h1 className="mt-[22px] text-center text-xl font-bold text-gray-900">
+        <h1 className="mt-6 text-center text-xl font-bold text-gray-900">
           Accès administrateur
         </h1>
 
-        <p className="mb-6 mt-1 text-center text-[13.5px] text-gray-500">
+        <p className="mb-6 mt-1 text-center text-sm text-gray-500">
           Connectez-vous pour gérer la plateforme.
         </p>
 
@@ -82,7 +82,7 @@ export default function AdminLoginPage() {
           </div>
 
           {error && (
-            <div className="flex items-center gap-1.5 text-[13px] text-red-500">
+            <div className="flex items-center gap-1.5 text-sm text-red-500">
               <AlertCircle className="h-[15px] w-[15px]" aria-hidden /> {error}
             </div>
           )}
@@ -92,8 +92,8 @@ export default function AdminLoginPage() {
           </Button>
         </form>
 
-        <div className="mt-[18px] text-center">
-          <Link href="/" className="text-[13px] text-gray-500 hover:text-brand">
+        <div className="mt-5 text-center">
+          <Link href="/" className="text-sm text-gray-500 hover:text-brand">
             ← Retour au site
           </Link>
         </div>

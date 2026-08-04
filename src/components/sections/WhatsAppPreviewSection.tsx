@@ -17,7 +17,7 @@ export function WhatsAppPreviewSection() {
             Exemple d&apos;alerte hebdo
           </span>
 
-          <h2 className="mt-[18px] text-[28px] font-extrabold tracking-[-0.03em] text-gray-900">
+          <h2 className="mt-5 text-3xl font-extrabold tracking-display text-gray-900">
             Ce que vous recevez chaque vendredi
           </h2>
 
@@ -34,7 +34,7 @@ export function WhatsAppPreviewSection() {
                   aria-hidden
                 />
 
-                <span className="text-[15px] text-gray-700">{p}</span>
+                <span className="text-base text-gray-700">{p}</span>
               </div>
             ))}
           </div>

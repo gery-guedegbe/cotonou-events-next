@@ -26,12 +26,12 @@ export function HowItWorksSection() {
     <section id="comment" className="scroll-mt-20 bg-gray-50 py-20">
       <div className="mx-auto max-w-[1100px] px-5">
         <div className="mb-12 text-center">
-          <h2 className="text-[30px] font-extrabold tracking-[-0.03em] text-gray-900">
+          <h2 className="text-3xl font-extrabold tracking-display text-gray-900">
             Comment ça marche
           </h2>
 
-          <p className="mt-2.5 text-base text-gray-500">
-            Simple comme bonjour.
+          <p className="mt-2.5 text-base text-gray-600">
+            De l&apos;inscription au premier message : moins d&apos;une minute.
           </p>
         </div>
 
@@ -41,8 +41,8 @@ export function HowItWorksSection() {
               key={s.num}
               className="rounded-2xl border border-gray-200 bg-white p-7"
             >
-              <div className="mb-[18px] flex items-center gap-3.5">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-light text-[15px] font-extrabold text-brand">
+              <div className="mb-5 flex items-center gap-3.5">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-light text-base font-extrabold text-brand">
                   {s.num}
                 </div>
 
@@ -53,7 +53,7 @@ export function HowItWorksSection() {
                 />
               </div>
 
-              <h3 className="text-[17px] font-bold text-gray-900">{s.title}</h3>
+              <h3 className="text-lg font-bold text-gray-900">{s.title}</h3>
 
               <p className="mt-2 text-sm leading-relaxed text-gray-500">
                 {s.text}

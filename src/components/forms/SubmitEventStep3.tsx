@@ -24,7 +24,7 @@ export function SubmitEventStep3({
   setValue,
 }: SubmitEventStep3Props) {
   return (
-    <div className="flex flex-col gap-[22px]">
+    <div className="flex flex-col gap-6">
       <div>
         <FieldLabel htmlFor="org">Nom ou organisation *</FieldLabel>
 

@@ -16,13 +16,13 @@ export function FieldLabel({
     <label
       htmlFor={htmlFor}
       className={cn(
-        "mb-1.5 block text-[13.5px] font-semibold text-gray-700",
+        "mb-1.5 block text-sm font-semibold text-gray-700",
         className,
       )}
     >
       {children}
       {optional && (
-        <span className="font-normal text-gray-400"> (optionnel)</span>
+        <span className="font-normal text-gray-500"> (optionnel)</span>
       )}
     </label>
   );

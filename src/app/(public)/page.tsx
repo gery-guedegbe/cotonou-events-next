@@ -6,20 +6,24 @@ import { WhatsAppPreviewSection } from "@/components/sections/WhatsAppPreviewSec
 import { CtaSection } from "@/components/sections/CtaSection";
 import { OrganizersSection } from "@/components/sections/OrganizersSection";
 import { getPublishedEvents } from "@/lib/supabase/events";
+import { getPublicStats } from "@/lib/supabase/stats";
 
 // ISR : la page affiche désormais les vrais événements, revalidée toutes les heures.
 export const revalidate = 3600;
 
 export default async function HomePage() {
-  const events = await getPublishedEvents();
+  const [events, stats] = await Promise.all([
+    getPublishedEvents(),
+    getPublicStats(),
+  ]);
   return (
     <>
-      <HeroSection />
-      <StatsSection />
+      <HeroSection subscribers={stats.subscribers} />
+      <StatsSection stats={stats} />
       <HowItWorksSection />
       <EventsPreviewSection events={events} />
       <WhatsAppPreviewSection />
-      <CtaSection />
+      <CtaSection subscribers={stats.subscribers} />
       <OrganizersSection />
     </>
   );

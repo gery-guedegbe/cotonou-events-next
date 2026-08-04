@@ -12,7 +12,7 @@ export function Logo({
     <Link
       href="/"
       className={cn(
-        "text-[19px] font-extrabold tracking-[-0.03em]",
+        "text-xl font-extrabold tracking-display",
         light ? "text-white" : "text-gray-900",
         className,
       )}

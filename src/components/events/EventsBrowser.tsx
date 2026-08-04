@@ -19,6 +19,7 @@ import {
 import { EventCard } from "@/components/events/EventCard";
 import { SearchBar } from "@/components/events/SearchBar";
 import { Button } from "@/components/ui/Button";
+import { EmptyState } from "@/components/ui/EmptyState";
 import type { CotonouEvent } from "@/lib/types/event.types";
 
 const PAGE_SIZE = 9;
@@ -51,11 +52,11 @@ export function EventsBrowser({ events }: { events: CotonouEvent[] }) {
   return (
     <div className="mx-auto max-w-container px-5 pb-16 pt-9">
       <div className="mb-7">
-        <h1 className="text-[28px] font-extrabold tracking-[-0.03em] text-gray-900 md:text-[34px]">
+        <h1 className="text-3xl font-extrabold tracking-display text-gray-900 md:text-4xl">
           Événements à Cotonou
         </h1>
 
-        <p className="mt-2 text-[15px] text-gray-500">
+        <p className="mt-2 text-base text-gray-500">
           {results.length} événement{results.length > 1 ? "s" : ""} disponible
           {results.length > 1 ? "s" : ""}
         </p>
@@ -72,32 +73,25 @@ export function EventsBrowser({ events }: { events: CotonouEvent[] }) {
       </div>
 
       <div className="grid items-start gap-8 md:grid-cols-[280px_1fr]">
-        <aside className="sticky top-[88px] hidden rounded-2xl border border-gray-200 bg-white p-[22px] md:block">
-          <EventFilters filters={filters} onChange={update} onReset={reset} />
+        <aside className="sticky top-nav hidden rounded-2xl border border-gray-200 bg-white p-6 md:block">
+          <EventFilters
+            filters={filters}
+            onChange={update}
+            onReset={reset}
+            groupPrefix="desktop"
+          />
         </aside>
 
         <div>
           {results.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-gray-200 px-5 py-20 text-center">
-              <SearchX
-                className="mx-auto h-12 w-12 text-gray-400"
-                strokeWidth={1.5}
-                aria-hidden
-              />
-
-              <h3 className="mt-[18px] text-lg font-bold text-gray-900">
-                Aucun événement trouvé
-              </h3>
-
-              <p className="mt-2 text-sm text-gray-500">
-                Essayez d&apos;élargir votre recherche ou de réinitialiser les
-                filtres.
-              </p>
-
-              <Button onClick={reset} className="mt-5">
-                Réinitialiser les filtres
-              </Button>
-            </div>
+            <EmptyState
+              icon={SearchX}
+              title="Aucun événement trouvé"
+              description="Essayez d'élargir votre recherche ou de réinitialiser les filtres."
+              action={
+                <Button onClick={reset}>Réinitialiser les filtres</Button>
+              }
+            />
           ) : (
             <>
               <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -111,7 +105,7 @@ export function EventsBrowser({ events }: { events: CotonouEvent[] }) {
                   <button
                     onClick={() => setPage((p) => Math.max(1, p - 1))}
                     disabled={current === 1}
-                    className="flex h-10 items-center gap-1 rounded-pill border-[1.5px] border-gray-200 px-3.5 text-sm font-semibold text-gray-700 disabled:cursor-not-allowed disabled:text-gray-300"
+                    className="flex h-11 items-center gap-1 rounded-pill border-[1.5px] border-gray-200 px-4 text-sm font-semibold text-gray-700 disabled:cursor-not-allowed disabled:text-gray-400"
                   >
                     <ChevronLeft className="h-4 w-4" aria-hidden /> Précédent
                   </button>
@@ -120,7 +114,7 @@ export function EventsBrowser({ events }: { events: CotonouEvent[] }) {
                     <button
                       key={i}
                       onClick={() => setPage(i + 1)}
-                      className={`h-10 w-10 rounded-full text-sm font-bold ${
+                      className={`h-11 w-11 rounded-full text-sm font-bold ${
                         current === i + 1
                           ? "bg-brand text-white"
                           : "bg-gray-100 text-gray-700"
@@ -133,7 +127,7 @@ export function EventsBrowser({ events }: { events: CotonouEvent[] }) {
                   <button
                     onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                     disabled={current === totalPages}
-                    className="flex h-10 items-center gap-1 rounded-pill border-[1.5px] border-gray-200 px-3.5 text-sm font-semibold text-gray-700 disabled:cursor-not-allowed disabled:text-gray-300"
+                    className="flex h-11 items-center gap-1 rounded-pill border-[1.5px] border-gray-200 px-4 text-sm font-semibold text-gray-700 disabled:cursor-not-allowed disabled:text-gray-400"
                   >
                     Suivant <ChevronRight className="h-4 w-4" aria-hidden />
                   </button>
@@ -145,7 +139,12 @@ export function EventsBrowser({ events }: { events: CotonouEvent[] }) {
       </div>
 
       {/* Barre filtres mobile */}
-      <div className="fixed inset-x-0 bottom-0 z-[70] border-t border-gray-200 bg-white p-4 shadow-[0_-4px_16px_rgba(0,0,0,0.06)] md:hidden">
+      {/* Décalée au-dessus de la bannière cookies quand celle-ci est affichée
+          (variable publiée par CookieBanner), sinon collée en bas. */}
+      <div
+        style={{ bottom: "var(--cookie-banner-h, 0px)" }}
+        className="fixed inset-x-0 z-[70] border-t border-gray-200 bg-white p-4 shadow-[0_-4px_16px_rgba(0,0,0,0.06)] md:hidden"
+      >
         <Button
           onClick={() => setDrawer(true)}
           className="w-full"
@@ -175,10 +174,12 @@ export function EventsBrowser({ events }: { events: CotonouEvent[] }) {
               className="absolute inset-x-0 bottom-0 max-h-[82vh] overflow-y-auto rounded-t-[20px] bg-white p-5 pb-7"
             >
               <div className="mb-2 flex justify-end">
+                {/* -mr-2 compense le padding ajouté pour atteindre 44px sans
+                    décaler visuellement l'icône par rapport au bord. */}
                 <button
                   onClick={() => setDrawer(false)}
-                  aria-label="Fermer"
-                  className="text-gray-400"
+                  aria-label="Fermer les filtres"
+                  className="-mr-2 flex h-11 w-11 items-center justify-center rounded-full text-gray-600 transition-colors hover:bg-gray-100"
                 >
                   <X className="h-5 w-5" aria-hidden />
                 </button>
@@ -188,6 +189,7 @@ export function EventsBrowser({ events }: { events: CotonouEvent[] }) {
                 filters={filters}
                 onChange={update}
                 onReset={reset}
+                groupPrefix="mobile"
               />
 
               <Button onClick={() => setDrawer(false)} className="mt-4 w-full">

@@ -13,9 +13,9 @@ export function StatsCard({
   tone?: "green" | "amber";
 }) {
   return (
-    <div className="rounded-2xl border border-gray-200 bg-white p-[18px]">
+    <div className="rounded-2xl border border-gray-200 bg-white p-5">
       <div className="flex items-center justify-between">
-        <span className="text-[13px] text-gray-500">{label}</span>
+        <span className="text-sm text-gray-500">{label}</span>
 
         <div
           className={cn(
@@ -34,7 +34,7 @@ export function StatsCard({
         </div>
       </div>
 
-      <div className="mt-2.5 text-[28px] font-extrabold tracking-[-0.02em] text-gray-900">
+      <div className="mt-2.5 text-2xl font-extrabold tracking-title text-gray-900">
         {value}
       </div>
     </div>

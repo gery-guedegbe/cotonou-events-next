@@ -33,13 +33,13 @@ const FAQ: FaqItem[] = [
 export default function AlertesPage() {
   return (
     <>
-      <section className="bg-gradient-to-br from-whatsapp-header to-[#128C7E] px-5 py-[52px]">
+      <section className="bg-gradient-to-br from-whatsapp-header to-[#128C7E] px-5 py-14">
         <div className="mx-auto max-w-[620px] text-center">
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-white/15">
             <MessageCircle className="h-8 w-8 text-white" aria-hidden />
           </div>
 
-          <h1 className="mt-5 text-[26px] font-extrabold leading-tight tracking-[-0.03em] text-white md:text-[32px]">
+          <h1 className="mt-5 text-3xl font-extrabold tracking-display text-white md:text-4xl">
             Recevez les alertes événements chaque vendredi
           </h1>
 
@@ -52,8 +52,8 @@ export default function AlertesPage() {
       <div className="mx-auto max-w-[560px] px-5 pb-16 pt-10">
         <AlertSubscribeForm />
 
-        <div className="mt-9 rounded-2xl border border-gray-200 bg-gray-50 p-[22px]">
-          <div className="mb-3.5 text-[11px] font-bold uppercase tracking-[0.07em] text-gray-400">
+        <div className="mt-9 rounded-2xl border border-gray-200 bg-gray-50 p-6">
+          <div className="mb-3.5 text-2xs font-bold uppercase tracking-label text-gray-500">
             Aperçu du message que vous recevrez
           </div>
           <div className="overflow-hidden rounded-xl">
@@ -62,7 +62,7 @@ export default function AlertesPage() {
         </div>
 
         <div className="mt-10">
-          <h2 className="mb-4 text-xl font-extrabold tracking-[-0.02em] text-gray-900">
+          <h2 className="mb-4 text-xl font-extrabold tracking-title text-gray-900">
             Questions fréquentes
           </h2>
           <Accordion items={FAQ} />

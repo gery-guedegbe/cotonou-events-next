@@ -59,14 +59,14 @@ export function PendingTab({ pending, onChange }: PendingTabProps) {
       {pending.map((p) => (
         <div
           key={p.id}
-          className="flex flex-wrap items-start gap-4 rounded-2xl border border-gray-200 bg-white p-[18px]"
+          className="flex flex-wrap items-start gap-4 rounded-2xl border border-gray-200 bg-white p-5"
         >
           <div className="min-w-[220px] flex-1">
             <div className="text-base font-bold text-gray-900">{p.title}</div>
 
             <div className="mt-2.5 flex flex-wrap gap-2">
               <span
-                className="rounded-pill px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.05em]"
+                className="rounded-pill px-2.5 py-1 text-2xs font-bold uppercase tracking-label"
                 style={{
                   background: CATEGORIES[p.category].bg,
                   color: CATEGORIES[p.category].text,
@@ -75,12 +75,12 @@ export function PendingTab({ pending, onChange }: PendingTabProps) {
                 {p.category}
               </span>
 
-              <span className="rounded-pill bg-gray-100 px-2.5 py-1 text-[11px] font-bold text-gray-700">
+              <span className="rounded-pill bg-gray-100 px-2.5 py-1 text-2xs font-bold text-gray-700">
                 {p.source}
               </span>
             </div>
 
-            <div className="mt-3 flex flex-wrap gap-4 text-[13px] text-gray-500">
+            <div className="mt-3 flex flex-wrap gap-4 text-sm text-gray-500">
               <span>📅 {p.date}</span>
               <span>📍 {p.lieu}</span>
               <span>
@@ -88,7 +88,7 @@ export function PendingTab({ pending, onChange }: PendingTabProps) {
               </span>
             </div>
 
-            <div className="mt-2 text-xs text-gray-400">
+            <div className="mt-2 text-xs text-gray-500">
               Soumis {p.submitted}
             </div>
           </div>
@@ -97,7 +97,7 @@ export function PendingTab({ pending, onChange }: PendingTabProps) {
             <button
               disabled={busyId === p.id}
               onClick={() => handle(p.id, "approve")}
-              className="inline-flex items-center gap-1.5 rounded-pill bg-brand px-4 py-2.5 text-[13px] font-semibold text-white hover:bg-brand-hover disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 rounded-pill bg-brand px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-hover disabled:opacity-50"
             >
               <Check className="h-[15px] w-[15px]" aria-hidden /> Publier
             </button>
@@ -105,14 +105,14 @@ export function PendingTab({ pending, onChange }: PendingTabProps) {
             <button
               disabled={busyId === p.id}
               onClick={() => handle(p.id, "reject")}
-              className="inline-flex items-center gap-1.5 rounded-pill border-[1.5px] border-red-200 bg-white px-4 py-2.5 text-[13px] font-semibold text-red-500 hover:bg-red-50 disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 rounded-pill border-[1.5px] border-red-200 bg-white px-4 py-2.5 text-sm font-semibold text-red-500 hover:bg-red-50 disabled:opacity-50"
             >
               <X className="h-[15px] w-[15px]" aria-hidden /> Rejeter
             </button>
 
             <Link
               href={`/admin/evenements/${p.id}`}
-              className="inline-flex items-center gap-1.5 rounded-pill px-3 py-2.5 text-[13px] font-semibold text-gray-500 hover:bg-gray-100"
+              className="inline-flex items-center gap-1.5 rounded-pill px-3 py-2.5 text-sm font-semibold text-gray-500 hover:bg-gray-100"
             >
               <Eye className="h-[15px] w-[15px]" aria-hidden /> Voir
             </Link>

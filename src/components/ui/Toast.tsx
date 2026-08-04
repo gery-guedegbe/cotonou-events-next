@@ -76,7 +76,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
                   </div>
 
                   {t.description && (
-                    <div className="text-[13px] text-gray-500">
+                    <div className="text-sm text-gray-500">
                       {t.description}
                     </div>
                   )}
@@ -87,7 +87,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
                     setToasts((prev) => prev.filter((x) => x.id !== t.id))
                   }
                   aria-label="Fermer"
-                  className="ml-1 text-gray-400 hover:text-gray-600"
+                  className="ml-1 text-gray-500 hover:text-gray-600"
                 >
                   <X className="h-4 w-4" aria-hidden />
                 </button>

@@ -10,10 +10,12 @@
     @apply bg-white text-gray-900 antialiased;
     font-feature-settings: "ss01";
   }
-  /* Anneau de focus visible et cohérent sur tous les éléments interactifs */
-  /* :focus-visible {
+  /* Anneau de focus visible et cohérent sur tous les éléments interactifs.
+     :focus-visible ne se déclenche qu'au clavier, donc il n'apparaît pas
+     au clic souris et ne pollue pas le rendu tactile. */
+  :focus-visible {
     @apply outline-none ring-2 ring-brand ring-offset-2;
-  } */
+  }
 }
 
 @layer utilities {

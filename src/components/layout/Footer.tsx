@@ -46,7 +46,7 @@ export function Footer() {
           <div className="col-span-2 md:col-span-1">
             <Logo light />
 
-            <p className="mt-3.5 max-w-[240px] text-[13px] leading-relaxed text-white/55">
+            <p className="mt-3.5 max-w-[240px] text-sm leading-relaxed text-white/75">
               L&apos;agenda WhatsApp des événements de Cotonou. Chaque vendredi,
               les 7 meilleurs plans du week-end.
             </p>
@@ -54,11 +54,11 @@ export function Footer() {
 
           {COLUMNS.map((col) => (
             <div key={col.title}>
-              <div className="mb-3.5 text-[11px] font-bold uppercase tracking-[0.08em] text-white/40">
+              <div className="mb-3.5 text-2xs font-bold uppercase tracking-label text-white/70">
                 {col.title}
               </div>
 
-              <div className="flex flex-col gap-[11px]">
+              <div className="flex flex-col gap-3">
                 {col.links.map((l) => (
                   <Link
                     key={l.href}
@@ -74,11 +74,11 @@ export function Footer() {
         </div>
 
         <div className="mt-9 flex flex-wrap items-center justify-between gap-3 border-t border-white/[0.08] pt-6">
-          <span className="text-xs text-white/35">
+          <span className="text-xs text-white/70">
             © {currentYear} Cotonou.events · Fait avec soin au Bénin 🇧🇯
           </span>
 
-          <span className="text-xs text-white/35">
+          <span className="text-xs text-white/70">
             Données collectées : prénom &amp; numéro WhatsApp uniquement.
           </span>
         </div>

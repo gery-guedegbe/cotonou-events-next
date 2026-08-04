@@ -3,7 +3,13 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ChevronRight, ArrowLeft, ExternalLink } from "lucide-react";
 import { getPublishedEvents, getEventById, getSimilarEvents } from "@/lib/supabase/events";
-import { toISODateTime } from "@/lib/utils/format-date";
+import {
+  eventSchema,
+  breadcrumbSchema,
+  jsonLdString,
+} from "@/lib/seo/schema";
+import { truncateAtWord } from "@/lib/utils/text";
+import { formatLocation } from "@/lib/utils/location";
 import { EventDetailView, EventHeroImage } from "@/components/events/EventDetailView";
 import { EventCard } from "@/components/events/EventCard";
 import { ShareCard } from "@/components/events/ShareCard";
@@ -24,15 +30,38 @@ export async function generateMetadata({
   const { id } = await params;
   const event = await getEventById(id);
   if (!event) return { title: "Événement introuvable" };
+
+  // Réponse d'abord : la description meta commence par les faits que
+  // l'internaute cherche (quoi, quand, où, combien), pas par une reprise du
+  // titre. C'est aussi ce que citent les moteurs génératifs.
+  const facts = [
+    `${event.dateLabel} à ${event.time}`,
+    formatLocation(event.venue, event.quartier),
+    event.priceType === "gratuit" ? "Entrée gratuite" : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+
+  const description = truncateAtWord(
+    `${facts}. ${event.description}`,
+    155,
+  );
+
   return {
     title: event.title,
-    description: event.description.slice(0, 155),
+    description,
     alternates: { canonical: `/evenements/${event.id}` },
     openGraph: {
       title: event.title,
-      description: event.description.slice(0, 155),
+      description,
       url: `/evenements/${event.id}`,
       type: "article",
+      locale: "fr_BJ",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: event.title,
+      description,
     },
   };
 }
@@ -44,44 +73,27 @@ export default async function EventDetailPage({ params }: { params: Params }) {
 
   const similar = await getSimilarEvents(event);
 
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Event",
-    name: event.title,
-    startDate: toISODateTime(event.date, event.time),
-    eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
-    eventStatus: "https://schema.org/EventScheduled",
-    location: {
-      "@type": "Place",
-      name: event.venue,
-      address: {
-        "@type": "PostalAddress",
-        addressLocality: event.quartier,
-        addressRegion: "Cotonou",
-        addressCountry: "BJ",
-      },
-    },
-    description: event.description,
-    organizer: { "@type": "Organization", name: event.organizer },
-    offers: {
-      "@type": "Offer",
-      price: event.price,
-      priceCurrency: "XOF",
-      availability: "https://schema.org/InStock",
-      url: `https://cotonou.events/evenements/${event.id}`,
-    },
-  };
+  // Le fil d'ariane visuel existait sans son équivalent structuré : les
+  // moteurs ne pouvaient pas reconstituer la hiérarchie du site.
+  const jsonLd = [
+    eventSchema(event),
+    breadcrumbSchema([
+      { name: "Accueil", path: "/" },
+      { name: "Événements", path: "/evenements" },
+      { name: event.title, path: `/evenements/${event.id}` },
+    ]),
+  ];
 
   return (
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdString(jsonLd) }}
       />
 
       <div className="mx-auto max-w-container px-5 pt-6">
         <nav
-          className="flex flex-wrap items-center gap-2 text-[13px] text-gray-400"
+          className="flex flex-wrap items-center gap-2 text-sm text-gray-500"
           aria-label="Fil d'ariane"
         >
           <Link href="/" className="hover:text-brand">
@@ -119,13 +131,19 @@ export default async function EventDetailPage({ params }: { params: Params }) {
         <div className="max-w-[800px]">
           <EventDetailView event={event} />
 
-          <a
-            href="#"
-            className="mt-[22px] inline-flex items-center gap-1.5 text-[13.5px] text-gray-500 hover:text-brand"
-          >
-            <ExternalLink className="h-[15px] w-[15px]" aria-hidden />
-            Voir l&apos;annonce originale sur {event.source}
-          </a>
+          {/* Affiché seulement si la source existe : un lien mort vers "#"
+              est pire que pas de lien du tout. */}
+          {event.sourceUrl && (
+            <a
+              href={event.sourceUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-6 inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-brand"
+            >
+              <ExternalLink className="h-[15px] w-[15px]" aria-hidden />
+              Voir l&apos;annonce originale sur {event.source}
+            </a>
+          )}
         </div>
 
         <ShareCard title={event.title} />
@@ -134,7 +152,7 @@ export default async function EventDetailPage({ params }: { params: Params }) {
       {similar.length > 0 && (
         <div className="bg-gray-50 py-14">
           <div className="mx-auto max-w-container px-5">
-            <h2 className="mb-6 text-[22px] font-extrabold tracking-[-0.02em] text-gray-900">
+            <h2 className="mb-6 text-2xl font-extrabold tracking-title text-gray-900">
               Événements similaires
             </h2>
 

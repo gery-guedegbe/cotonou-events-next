@@ -11,19 +11,19 @@ export function SystemTab() {
 
   return (
     <>
-      <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-[13px] text-amber-800">
+      <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
         Aperçu — n8n, Apify et l&apos;API WhatsApp ne sont pas encore déployés.
         Les chiffres ci-dessous sont illustratifs, pas des données réelles.
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <div className="rounded-2xl border border-gray-200 bg-white p-[18px]">
+        <div className="rounded-2xl border border-gray-200 bg-white p-5">
           <div className="mb-3 flex items-center gap-2.5">
             <RefreshCw className="h-[18px] w-[18px] text-brand" aria-hidden />
             <span className="text-sm font-bold">Dernier run Apify</span>
           </div>
 
-          <div className="text-[13px] leading-relaxed text-gray-500">
+          <div className="text-sm leading-relaxed text-gray-500">
             Aujourd&apos;hui à 06:00
             <br />
             <b className="text-gray-900">12 ajoutés</b> ·{" "}
@@ -33,14 +33,14 @@ export function SystemTab() {
           </div>
         </div>
 
-        <div className="rounded-2xl border border-gray-200 bg-white p-[18px]">
+        <div className="rounded-2xl border border-gray-200 bg-white p-5">
           <div className="mb-3 flex items-center gap-2.5">
             <Send className="h-[18px] w-[18px] text-brand" aria-hidden />
 
             <span className="text-sm font-bold">Prochain digest WhatsApp</span>
           </div>
 
-          <div className="text-[13px] leading-relaxed text-gray-500">
+          <div className="text-sm leading-relaxed text-gray-500">
             Vendredi 23 mai · 18:00
             <br />
             <b className="text-gray-900">127 destinataires</b>
@@ -49,7 +49,7 @@ export function SystemTab() {
           </div>
         </div>
 
-        <div className="rounded-2xl border border-gray-200 bg-white p-[18px]">
+        <div className="rounded-2xl border border-gray-200 bg-white p-5">
           <div className="mb-3 flex items-center gap-2.5">
             <MessageSquare
               className="h-[18px] w-[18px] text-brand"
@@ -59,7 +59,7 @@ export function SystemTab() {
             <span className="text-sm font-bold">Quota Meta WhatsApp</span>
           </div>
 
-          <div className="mb-2 text-[13px] text-gray-500">
+          <div className="mb-2 text-sm text-gray-500">
             218 / 1000 conversations
           </div>
 
@@ -68,14 +68,14 @@ export function SystemTab() {
           </div>
         </div>
 
-        <div className="rounded-2xl border border-gray-200 bg-white p-[18px]">
+        <div className="rounded-2xl border border-gray-200 bg-white p-5">
           <div className="mb-3 flex items-center gap-2.5">
             <Database className="h-[18px] w-[18px] text-brand" aria-hidden />
 
             <span className="text-sm font-bold">Base Supabase</span>
           </div>
 
-          <div className="mb-2 text-[13px] text-gray-500">142 Mo / 500 Mo</div>
+          <div className="mb-2 text-sm text-gray-500">142 Mo / 500 Mo</div>
 
           <div className="h-2 overflow-hidden rounded-pill bg-gray-100">
             <div className="h-full bg-brand" style={{ width: "28%" }} />
@@ -91,7 +91,7 @@ export function SystemTab() {
       </div>
 
       <div className="mt-4">
-        <div className="mb-2 text-[13px] font-semibold text-gray-700">
+        <div className="mb-2 text-sm font-semibold text-gray-700">
           Logs système
         </div>
 

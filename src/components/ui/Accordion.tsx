@@ -32,7 +32,7 @@ export function Accordion({
               aria-expanded={isOpen}
               className="flex w-full items-center justify-between gap-3 p-4 text-left"
             >
-              <span className="text-[15px] font-semibold text-gray-900">
+              <span className="text-base font-semibold text-gray-900">
                 {item.q}
               </span>
 

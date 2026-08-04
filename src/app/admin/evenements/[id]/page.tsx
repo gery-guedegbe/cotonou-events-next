@@ -31,7 +31,7 @@ export default async function AdminEventDetailPage({ params }: { params: Params 
   if (!event) notFound();
 
   return (
-    <div className="mx-auto max-w-[900px] p-[22px]">
+    <div className="mx-auto max-w-[900px] p-6">
       <Link
         href="/admin"
         className="inline-flex items-center gap-1.5 text-sm font-semibold text-gray-700 hover:text-brand"
@@ -46,7 +46,7 @@ export default async function AdminEventDetailPage({ params }: { params: Params 
       <div className="mt-7">
         <span
           className={cn(
-            "rounded-pill px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.05em]",
+            "rounded-pill px-2.5 py-1 text-2xs font-bold uppercase tracking-label",
             STATUT_BADGE[event.statut],
           )}
         >
@@ -61,7 +61,7 @@ export default async function AdminEventDetailPage({ params }: { params: Params 
           Contact organisateur
         </h2>
 
-        <div className="flex flex-col gap-2.5 rounded-2xl border border-gray-200 bg-white p-[18px] text-[14.5px] text-gray-700">
+        <div className="flex flex-col gap-2.5 rounded-2xl border border-gray-200 bg-white p-5 text-sm text-gray-700">
           <div className="flex items-center gap-2.5">
             <Phone className="h-4 w-4 flex-none text-brand" aria-hidden />
             {event.contactPhone}

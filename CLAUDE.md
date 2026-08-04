@@ -174,9 +174,16 @@ Séquence des nœuds :
 7. IF : si trouvé, UPDATE pour ajouter le nouvel `apify_id` dans
    `apify_id_alternatif` (pas de nouvelle ligne) ; si absent, INSERT
    réel dans `events`
-8. Aggregate / Code Node : compteurs (ajoutés, mis à jour, rejetés
-   par filtre, doublons)
-9. Execute Workflow vers WF5 (monitoring partagé)
+8. Node Postgres, purge : `DELETE FROM events WHERE date_debut < now() -
+   interval '30 days' AND source_type = 'apify' RETURNING id`. Sans cette
+   étape la table accumule indéfiniment des événements passés. Restreint à
+   `apify` volontairement : les soumissions formulaire portent les
+   coordonnées des organisateurs (`organisateur_email`,
+   `organisateur_contact`, `organisateur_contact_fb`), qui sont un actif à
+   conserver. Détail complet dans `docs/n8n-wf1-purge.md`.
+9. Aggregate / Code Node : compteurs (ajoutés, mis à jour, rejetés
+   par filtre, doublons, purgés)
+10. Execute Workflow vers WF5 (monitoring partagé)
 
 ### WF2 — Soumission formulaire
 
@@ -275,6 +282,23 @@ Tous les items rejetés par ces filtres sont insérés dans
 `events_rejetes_auto` avec la raison et les données brutes complètes, pour
 permettre un audit et un ajustement des règles après usage réel — jamais
 perdus silencieusement.
+
+### Normalisation des valeurs nulles (à respecter dans le Code Node)
+
+Constat sur les données réellement en base au 31 juillet 2026 : sur 47
+événements publiés, 44 n'ont aucune image et les 3 restants portent la
+**chaîne de caractères `"null"`** dans `image_url`, pas un `NULL` SQL. C'est
+la signature d'une expression qui sérialise une valeur nulle en texte
+(`String(valeur)` ou `{{ $json.image }}` côté n8n).
+
+Le Code Node de WF1 doit émettre de vrais `null` JavaScript, jamais les
+littéraux `"null"` / `"undefined"` / `""`. Vérifier chaque champ optionnel
+(`image_url`, `url_source`, `lieu_texte`, `quartier`, `montant`).
+
+Le frontend s'en protège déjà (`isDisplayableImageUrl` écarte explicitement
+ces littéraux, sinon le navigateur afficherait une icône d'image brisée),
+mais c'est un filet, pas une excuse pour laisser passer la donnée sale : elle
+fausse tout comptage du type « combien d'événements ont une affiche ».
 
 ---
 
@@ -609,6 +633,125 @@ accents verts naturels, typographie sans-serif bold pour les titres).
 - Icônes : Lucide uniquement, stroke 1.5px
 - Badges catégorie : couleur dédiée par catégorie (voir maquette Figma /
   fichiers de design pour le détail exact des couleurs par catégorie)
+
+### Échelle typographique (définie dans `tailwind.config.ts`)
+
+Ne jamais réintroduire de taille arbitraire (`text-[13px]`, `text-[15px]`...).
+Le code en comptait 143 réparties sur 21 valeurs distinctes, dont cinq entre
+13 et 15.5px — un écart imperceptible qui ne relevait d'aucune intention.
+Tout est passé par ces dix pas :
+
+| Token | Taille | Usage |
+| --- | --- | --- |
+| `text-2xs` | 11px | micro-labels en capitales |
+| `text-xs` | 12px | badges, horodatages |
+| `text-sm` | 14px | méta secondaire |
+| `text-base` | 16px | corps de texte |
+| `text-lg` | 18px | chapô |
+| `text-xl` | 20px | petits titres |
+| `text-2xl` | 25px | sous-titres de section |
+| `text-3xl` | 31px | titres de section, h1 mobile |
+| `text-4xl` | 39px | h1 desktop, hero mobile |
+| `text-5xl` | 49px | hero desktop |
+
+Les pas `xs` à `xl` gardent délibérément les valeurs Tailwind par défaut : les
+redéfinir aurait modifié en silence la centaine d'usages existants de
+`text-sm` / `text-base`. Les valeurs arbitraires ont été absorbées **vers le
+haut**, jamais vers le bas, pour gagner en lisibilité sur mobile. Au-delà de
+`xl`, le ratio est de 1,25 (tierce majeure).
+
+La hauteur de ligne est portée par le token : ne pas la redéclarer avec
+`leading-*` sur les titres.
+
+Hiérarchie des titres, à respecter :
+
+- hero de la landing : `text-4xl md:text-5xl`
+- `h1` de page : `text-3xl md:text-4xl`
+- `h2` de section : `text-3xl`
+- `h2` secondaire : `text-2xl`
+
+### Autres tokens
+
+- Interlettrage : `tracking-display` (-0.035em) pour les grands titres,
+  `tracking-title` (-0.02em) pour les titres courants, `tracking-label`
+  (0.06em) pour les capitales. Pas de valeur arbitraire.
+- Espacement : grille Tailwind de 4px uniquement. `spacing.nav` (88px) est la
+  hauteur de navbar, à utiliser comme offset des colonnes `sticky`.
+- Contraste : `text-gray-400` est proscrit pour du texte (2,8:1 sur blanc,
+  échoue WCAG AA). Le gris secondaire minimum est `text-gray-500` (4,83:1).
+  L'exception admise couvre les icônes décoratives et les états désactivés,
+  exemptés par le critère WCAG 1.4.3.
+- Cibles tactiles : 44px minimum pour tout élément interactif, boutons-icônes
+  compris (padding au besoin, avec marge négative pour compenser).
+
+### Animations
+
+`MotionProvider` (`components/layout/MotionProvider.tsx`) enveloppe les layouts
+public et admin avec `MotionConfig reducedMotion="user"`. Indispensable : la
+règle `prefers-reduced-motion` de `globals.css` ne neutralise que les
+animations CSS, alors que Motion anime en JavaScript et y échappe
+entièrement. Les animations impératives (`animate()` de `CountUp`) ne sont pas
+gouvernées par `MotionConfig` et doivent tester la préférence elles-mêmes.
+
+### SEO et GEO
+
+Les schémas JSON-LD vivent tous dans `lib/seo/schema.ts`, jamais inlinés dans
+les pages : les mêmes entités sont référencées depuis plusieurs routes et deux
+copies divergentes cassent le graphe en silence.
+
+Entités en place : `Organization` + `WebSite` (layout racine), `Event` +
+`BreadcrumbList` (fiche événement), `ItemList` + `BreadcrumbList` (catalogue).
+
+Points à ne pas régresser :
+
+- **Géographie.** Cotonou est la ville (`addressLocality`), le quartier une
+  subdivision (`streetAddress`), le Littoral le département
+  (`addressRegion`). La version initiale mettait le quartier en
+  `addressLocality` et « Cotonou » en `addressRegion`, ce qui décrivait une
+  géographie inexistante.
+- **`geo`.** Renseigné depuis `latitude`/`longitude` quand la source les
+  fournit (46 événements sur 47 au 31 juillet 2026).
+- **`lastModified` du sitemap.** Doit venir de `created_at`, jamais de la date
+  de l'événement : celle-ci est par construction dans le futur, et un
+  `lastmod` postérieur à aujourd'hui discrédite tout le fichier.
+- **`endDate`, `image`.** Émis seulement si la source les fournit. Ne jamais
+  inventer une durée ou une affiche pour « remplir » le schéma.
+
+`/llms.txt` (`app/llms.txt/route.ts`) est **généré depuis la base**, pas écrit
+à la main : un fichier figé annoncerait un nombre d'événements faux dès le
+scraping suivant, et c'est exactement le type d'affirmation qu'un moteur
+génératif reprend puis attribue au site.
+
+Chaque événement a son image Open Graph dédiée
+(`evenements/[id]/opengraph-image.tsx`). Le produit se diffuse d'abord par
+WhatsApp : un lien partagé sans vignette propre n'affichait que le logo
+générique.
+
+### Règles de rédaction
+
+- **« Autre » ne s'affiche jamais.** C'est l'étiquette de repli du quartier
+  inconnu, pas une information. Passer par `formatLocation` / `formatArea`
+  (`lib/utils/location.ts`), qui l'omettent.
+- **Pas de formule ternaire interrogative.** Le motif « Une question, une
+  suggestion, un partenariat ? » apparaissait à l'identique sur trois pages
+  voisines — c'est le marqueur de texte généré le plus visible du projet.
+- **Pas de promesse d'audience non mesurable** (« touchez plus de monde »).
+  Décrire le mécanisme réel : publication immédiate, reprise dans le digest
+  du vendredi.
+- **Un seul libellé d'action** pour l'inscription : « Recevoir les alertes
+  WhatsApp » sur les boutons de formulaire, « Recevoir les alertes » sur les
+  liens de navigation. Il en existait cinq variantes.
+- **Incohérence connue, non tranchée** : la page À propos annonce « une seule
+  personne » tandis que les pages contact et légales parlent au « nous ». À
+  arbitrer.
+
+### États de page
+
+Chaque route de liste ou de détail a un `loading.tsx` en squelette calqué sur
+la structure finale (jamais de spinner plein écran). Les erreurs sont prises
+par `(public)/error.tsx` et, en dernier recours, `global-error.tsx` — qui doit
+porter ses propres `<html>`/`<body>` et réimporter `globals.css`. Les listes
+vides passent par `components/ui/EmptyState.tsx`, jamais par une zone blanche.
 
 Si un écran ou composant n'est pas couvert par ce fichier, se référer aux
 maquettes déjà produites avant d'inventer un nouveau pattern visuel.

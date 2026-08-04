@@ -49,7 +49,7 @@ export function AllEventsTab({ events }: { events: AdminEventListItem[] }) {
     <>
       <div className="relative mb-4 max-w-[420px]">
         <Search
-          className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
+          className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500"
           aria-hidden
         />
 
@@ -70,7 +70,7 @@ export function AllEventsTab({ events }: { events: AdminEventListItem[] }) {
                   <th
                     key={h || i}
                     className={cn(
-                      "px-4 py-3 text-[11px] font-bold uppercase tracking-[0.05em] text-gray-400",
+                      "px-4 py-3 text-2xs font-bold uppercase tracking-label text-gray-500",
                       i === 4 ? "text-right" : "text-left",
                     )}
                   >
@@ -83,17 +83,17 @@ export function AllEventsTab({ events }: { events: AdminEventListItem[] }) {
             <tbody>
               {rows.map((e) => (
                 <tr key={e.id} className="border-t border-gray-100">
-                  <td className="max-w-[280px] px-4 py-3.5 text-[13.5px] font-semibold text-gray-900">
+                  <td className="max-w-[280px] px-4 py-3.5 text-sm font-semibold text-gray-900">
                     <div className="truncate">{e.title}</div>
                   </td>
 
-                  <td className="whitespace-nowrap px-4 py-3.5 text-[13px] text-gray-500">
+                  <td className="whitespace-nowrap px-4 py-3.5 text-sm text-gray-500">
                     {e.dateLabel}
                   </td>
 
                   <td className="px-4 py-3.5">
                     <span
-                      className="rounded-pill px-2.5 py-1 text-[11px] font-bold"
+                      className="rounded-pill px-2.5 py-1 text-2xs font-bold"
                       style={{
                         background: CATEGORIES[e.category].bg,
                         color: CATEGORIES[e.category].text,
@@ -106,7 +106,7 @@ export function AllEventsTab({ events }: { events: AdminEventListItem[] }) {
                   <td className="px-4 py-3.5">
                     <span
                       className={cn(
-                        "rounded-pill px-2.5 py-1 text-[11px] font-bold",
+                        "rounded-pill px-2.5 py-1 text-2xs font-bold",
                         STATUT_BADGE[e.statut],
                       )}
                     >

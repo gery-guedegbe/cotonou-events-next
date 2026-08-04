@@ -31,7 +31,7 @@ export function SubmitEventStep1({
   onRemoveImage,
 }: SubmitEventStep1Props) {
   return (
-    <div className="flex flex-col gap-[22px]">
+    <div className="flex flex-col gap-6">
       <div>
         <FieldLabel htmlFor="title">Titre de l&apos;événement *</FieldLabel>
 
@@ -46,7 +46,7 @@ export function SubmitEventStep1({
         <div className="mt-1.5 flex justify-between">
           <FieldError>{errors.title?.message}</FieldError>
 
-          <span className="ml-auto text-xs text-gray-400">
+          <span className="ml-auto text-xs text-gray-500">
             {values.title?.length ?? 0}/100
           </span>
         </div>
@@ -101,7 +101,7 @@ export function SubmitEventStep1({
           {...register("description")}
           maxLength={500}
           placeholder="Décrivez votre événement (minimum 50 caractères)…"
-          className="min-h-[110px] w-full resize-y rounded-lg border-[1.5px] border-gray-200 p-3.5 text-[15px] leading-relaxed outline-none focus:border-brand focus:shadow-[0_0_0_3px_rgba(22,163,74,0.12)]"
+          className="min-h-[110px] w-full resize-y rounded-lg border-[1.5px] border-gray-200 p-3.5 text-base leading-relaxed outline-none focus:border-brand focus:shadow-[0_0_0_3px_rgba(22,163,74,0.12)]"
         />
 
         <div className="mt-1.5 flex justify-between">
@@ -112,7 +112,7 @@ export function SubmitEventStep1({
               "ml-auto text-xs",
               (values.description?.length ?? 0) < 50
                 ? "text-amber-500"
-                : "text-gray-400",
+                : "text-gray-500",
             )}
           >
             {values.description?.length ?? 0}/500 · min. 50
@@ -147,7 +147,7 @@ export function SubmitEventStep1({
               {...register("amount")}
               inputMode="numeric"
               placeholder="Montant"
-              className="flex-1 border-none px-3.5 text-[15px] outline-none"
+              className="flex-1 border-none px-3.5 text-base outline-none"
             />
 
             <div className="flex items-center border-l border-gray-200 bg-gray-50 px-3.5 text-sm text-gray-700">
@@ -167,14 +167,14 @@ export function SubmitEventStep1({
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={image}
-              alt="Aperçu"
+              alt="Aperçu de l'affiche sélectionnée"
               className="h-[120px] w-[120px] rounded-[10px] border border-gray-200 object-cover"
             />
 
             <button
               type="button"
               onClick={onRemoveImage}
-              className="inline-flex items-center gap-1.5 rounded-pill border-[1.5px] border-gray-200 bg-white px-3.5 py-2 text-[13px] font-semibold text-red-500"
+              className="inline-flex items-center gap-1.5 rounded-pill border-[1.5px] border-gray-200 bg-white px-3.5 py-2 text-sm font-semibold text-red-500"
             >
               <Trash2 className="h-[15px] w-[15px]" aria-hidden /> Supprimer
             </button>
@@ -182,7 +182,7 @@ export function SubmitEventStep1({
         ) : (
           <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-gray-200 bg-gray-50 p-7 text-center">
             <ImagePlus
-              className="h-8 w-8 text-gray-400"
+              className="h-8 w-8 text-gray-500"
               strokeWidth={1.5}
               aria-hidden
             />
@@ -191,7 +191,7 @@ export function SubmitEventStep1({
               Glissez une image ou cliquez pour parcourir
             </span>
 
-            <span className="text-xs text-gray-400">
+            <span className="text-xs text-gray-500">
               JPG, PNG, WEBP · max 5MB
             </span>
 

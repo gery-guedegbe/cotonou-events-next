@@ -1,12 +1,20 @@
 "use client";
 
-import { useState, useSyncExternalStore } from "react";
+import { useState, useSyncExternalStore, useEffect, useRef } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion } from "motion/react";
 import { Cookie, X } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 
 const KEY = "cotonou_cookie";
+
+/**
+ * Hauteur de la bannière, publiée en variable CSS sur <html>.
+ * La barre de filtres mobile de /evenements est elle aussi en bottom-0 : sans
+ * cet décalage, la bannière la recouvre à chaque première visite et le seul
+ * accès au filtrage sur mobile devient intouchable.
+ */
+const HEIGHT_VAR = "--cookie-banner-h";
 
 function subscribe() {
   return () => {};
@@ -32,6 +40,27 @@ export function CookieBanner() {
     getServerSnapshot,
   );
   const visible = notAccepted && !dismissed;
+  const bannerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    if (!visible) {
+      root.style.removeProperty(HEIGHT_VAR);
+      return;
+    }
+
+    const publishHeight = () => {
+      const height = bannerRef.current?.offsetHeight ?? 0;
+      root.style.setProperty(HEIGHT_VAR, `${height}px`);
+    };
+
+    publishHeight();
+    window.addEventListener("resize", publishHeight);
+    return () => {
+      window.removeEventListener("resize", publishHeight);
+      root.style.removeProperty(HEIGHT_VAR);
+    };
+  }, [visible]);
 
   const accept = () => {
     try {
@@ -46,6 +75,7 @@ export function CookieBanner() {
     <AnimatePresence>
       {visible && (
         <motion.div
+          ref={bannerRef}
           initial={{ y: "100%" }}
           animate={{ y: 0 }}
           exit={{ y: "100%" }}
@@ -55,14 +85,14 @@ export function CookieBanner() {
           <div className="mx-auto flex max-w-container flex-wrap items-center gap-3.5 px-5 py-3.5">
             <Cookie className="h-5 w-5 flex-none text-brand" aria-hidden />
 
-            <span className="min-w-[200px] flex-1 text-[13.5px] text-gray-700">
+            <span className="min-w-[200px] flex-1 text-sm text-gray-700">
               Nous utilisons des cookies essentiels uniquement, pour faire
               fonctionner le site.
             </span>
 
             <Link
               href="/cookies"
-              className="text-[13.5px] font-semibold text-brand"
+              className="text-sm font-semibold text-brand"
             >
               En savoir plus
             </Link>
@@ -74,7 +104,7 @@ export function CookieBanner() {
             <button
               onClick={accept}
               aria-label="Fermer"
-              className="flex h-9 w-9 items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100"
+              className="flex h-11 w-11 items-center justify-center rounded-lg text-gray-600 hover:bg-gray-100"
             >
               <X className="h-[18px] w-[18px]" aria-hidden />
             </button>
