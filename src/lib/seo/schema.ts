@@ -1,8 +1,8 @@
 import type { CotonouEvent } from "@/lib/types/event.types";
 import { toISODateTime } from "@/lib/utils/format-date";
 
-export const SITE_URL = "https://cotonou.events";
-export const SITE_NAME = "Cotonou.events";
+export const SITE_URL = "https://cotonouevents.tech";
+export const SITE_NAME = "cotonouevents";
 
 /**
  * Constructeurs de JSON-LD. Regroupés ici plutôt qu'inlinés dans les pages :
@@ -41,9 +41,7 @@ export function websiteSchema() {
   };
 }
 
-export function breadcrumbSchema(
-  trail: { name: string; path: string }[],
-) {
+export function breadcrumbSchema(trail: { name: string; path: string }[]) {
   return {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",

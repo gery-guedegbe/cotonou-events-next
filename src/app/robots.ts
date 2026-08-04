@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: "/",
       disallow: ["/admin", "/soumettre/confirmation"],
     },
-    sitemap: "https://cotonou.events/sitemap.xml",
+    sitemap: "https://cotonouevents.tech/sitemap.xml",
   };
 }

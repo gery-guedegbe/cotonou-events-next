@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import {
   organizationSchema,
   websiteSchema,
@@ -18,7 +19,7 @@ const jakarta = Plus_Jakarta_Sans({
   display: "swap",
 });
 
-const SITE_NAME = "Cotonou.events";
+const SITE_NAME = "cotonouevents";
 const SITE_DESCRIPTION =
   "Chaque vendredi à 18h, recevez les 7 meilleurs événements du week-end à Cotonou directement sur WhatsApp. Gratuit, sans application.";
 
@@ -28,7 +29,7 @@ export const metadata: Metadata = {
     template: `%s — ${SITE_NAME}`,
   },
   description: SITE_DESCRIPTION,
-  metadataBase: new URL("https://cotonou.events"),
+  metadataBase: new URL("https://cotonouevents.tech"),
   alternates: { canonical: "/" },
   robots: { index: true, follow: true },
   openGraph: {
@@ -64,7 +65,7 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: jsonLdString(jsonLd) }}
         />
-
+        <Analytics />
         <a
           href="#main"
           className="sr-only focus:not-sr-only focus:absolute focus:left-3 focus:top-3 focus:z-[200] focus:rounded-lg focus:bg-brand focus:px-4 focus:py-2.5 focus:text-white"

@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import { getPublishedEvents } from "@/lib/supabase/events";
 
-const BASE_URL = "https://cotonou.events";
+const BASE_URL = "https://cotonouevents.tech";
 
 /** Pages dont le contenu dépend du catalogue d'événements. */
 const DYNAMIC_PATHS = new Set(["/", "/evenements"]);
