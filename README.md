@@ -1,8 +1,17 @@
-# Cotonou.events
+#Cotonou.events
 
-Cotonou.events est une plateforme web de découverte d’événements à Cotonou, au Bénin.
+Cotonou.events est une plateforme web qui centralise les événements organisés à Cotonou, au Bénin.
 
-Elle centralise des événements habituellement dispersés entre Facebook, les groupes WhatsApp et les médias locaux. Les utilisateurs peuvent consulter les événements disponibles et recevoir chaque vendredi une sélection personnalisée via WhatsApp.
+Les événements sont souvent dispersés entre Facebook, les groupes WhatsApp et les médias locaux. Cotonou.events les rassemble au même endroit afin de permettre aux utilisateurs de les découvrir plus facilement et de recevoir chaque vendredi une sélection personnalisée sur WhatsApp.
+
+## Aperçu
+
+<p align="center">
+  <img src="./public-assets/cotonou.events_landing_pages_capture.png" width="48%" alt="Accueil">
+  <img src="./public-assets/cotonou.events_admin_dashboard.png" width="48%" alt="Dashboard">
+</p>
+
+`Démo` : https://cotonouevents.tech
 
 ## Fonctionnalités
 
