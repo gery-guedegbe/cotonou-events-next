@@ -8,3 +8,10 @@ out
 next-env.d.ts
 *.tsbuildinfo
 docs
+
+# AI / Documentation privée
+CLAUDE.md
+.impeccable/
+
+# Scripts locaux
+scripts/
