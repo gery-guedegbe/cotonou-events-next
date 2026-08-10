@@ -8,6 +8,12 @@ import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { FieldLabel } from "@/components/ui/Field";
+import {
+  getLoginLockoutState,
+  recordFailedLoginAttempt,
+  clearLoginLockout,
+} from "@/lib/utils/admin-login-lockout";
+import { ADMIN_BASE_PATH } from "@/lib/constants/admin-path";
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -15,26 +21,39 @@ export default function AdminLoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [lockout, setLockout] = useState(getLoginLockoutState());
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    setLoading(true);
 
+    const currentLockout = getLoginLockoutState();
+    if (currentLockout.isBlocked) {
+      setLockout(currentLockout);
+      return;
+    }
+
+    setLoading(true);
     const supabase = createBrowserSupabaseClient();
     const { error: signInError } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
-
     setLoading(false);
 
     if (signInError) {
-      setError("Email ou mot de passe incorrect.");
+      const updated = recordFailedLoginAttempt();
+      setLockout(updated);
+      setError(
+        updated.isBlocked
+          ? "Trop de tentatives. Réessayez dans 15 minutes."
+          : `Email ou mot de passe incorrect. Il reste ${updated.remainingAttempts} tentative(s).`,
+      );
       return;
     }
 
-    router.replace("/admin");
+    clearLoginLockout();
+    router.replace(ADMIN_BASE_PATH);
     router.refresh();
   };
 
@@ -56,7 +75,6 @@ export default function AdminLoginPage() {
         <form onSubmit={submit} className="flex flex-col gap-3.5">
           <div>
             <FieldLabel htmlFor="email">Email</FieldLabel>
-
             <Input
               id="email"
               type="email"
@@ -69,7 +87,6 @@ export default function AdminLoginPage() {
 
           <div>
             <FieldLabel htmlFor="password">Mot de passe</FieldLabel>
-
             <Input
               id="password"
               type="password"
@@ -87,7 +104,12 @@ export default function AdminLoginPage() {
             </div>
           )}
 
-          <Button type="submit" size="lg" loading={loading}>
+          <Button
+            type="submit"
+            size="lg"
+            loading={loading}
+            disabled={lockout.isBlocked}
+          >
             Se connecter
           </Button>
         </form>

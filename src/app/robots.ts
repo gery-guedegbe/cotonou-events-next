@@ -5,7 +5,7 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: "*",
       allow: "/",
-      disallow: ["/admin", "/soumettre/confirmation"],
+      disallow: ["/secure-portal-5d24", "/soumettre/confirmation"],
     },
     sitemap: "https://cotonouevents.tech/sitemap.xml",
   };

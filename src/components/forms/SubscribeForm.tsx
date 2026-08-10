@@ -62,7 +62,11 @@ export function SubscribeForm({
     setLoading(false);
 
     if (!result.ok) {
-      toast({ variant: "error", title: "Inscription impossible", description: result.error });
+      toast({
+        variant: "error",
+        title: "Inscription impossible",
+        description: result.error,
+      });
       return;
     }
 
@@ -77,32 +81,27 @@ export function SubscribeForm({
 
   return (
     <form onSubmit={onSubmit} className="flex max-w-[480px] flex-col gap-2.5">
-      <div className="flex flex-wrap gap-2.5">
-        <div className="sm:flex-1">
-          <Input
-            {...register("prenom")}
-            aria-label="Votre prénom"
-            placeholder="Votre prénom"
-            className={cn(
-              "h-12",
-              dark &&
-                "border-white/15 bg-white/[0.08] text-white placeholder:text-white/70 focus:border-brand focus:shadow-none",
-            )}
-          />
-        </div>
+      <div className="flex w-full flex-wrap gap-2.5">
+        <Input
+          {...register("prenom")}
+          aria-label="Votre prénom"
+          placeholder="Votre prénom"
+          className={cn(
+            "h-12",
+            dark &&
+              "flex-1 border-white/15 bg-white/[0.08] text-white placeholder:text-white/70 focus:border-brand focus:shadow-none",
+          )}
+        />
 
-        <div className="sm:flex-[2]">
-          <PhoneInput
-            {...register("phone")}
-            value={phone}
-            dark={dark}
-            className="h-12"
-          />
-        </div>
-
+        <PhoneInput
+          {...register("phone")}
+          value={phone}
+          dark={dark}
+          className="h-12 flex-1"
+        />
       </div>
 
-      <Button type="submit" size="lg" loading={loading}>
+      <Button type="submit" size="md" loading={loading}>
         {buttonLabel}
       </Button>
 

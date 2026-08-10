@@ -9,6 +9,7 @@ import { CATEGORIES } from "@/lib/constants/categories";
 import { approveEvent, unpublishEvent } from "@/lib/actions/admin-events";
 import { cn } from "@/lib/utils/cn";
 import { useToast } from "@/components/ui/Toast";
+import { ADMIN_EVENTS_PATH } from "@/lib/constants/admin-path";
 
 const STATUT_BADGE: Record<string, string> = {
   en_attente: "bg-amber-100 text-amber-800",
@@ -29,16 +30,25 @@ export function AllEventsTab({ events }: { events: AdminEventListItem[] }) {
   const [busyId, setBusyId] = useState<string | null>(null);
 
   const rows = events.filter(
-    (e) => !query || `${e.title} ${e.venue}`.toLowerCase().includes(query.toLowerCase()),
+    (e) =>
+      !query ||
+      `${e.title} ${e.venue}`.toLowerCase().includes(query.toLowerCase()),
   );
 
   const toggle = async (e: AdminEventListItem) => {
     setBusyId(e.id);
-    const result = e.statut === "publie" ? await unpublishEvent(e.id) : await approveEvent(e.id);
+    const result =
+      e.statut === "publie"
+        ? await unpublishEvent(e.id)
+        : await approveEvent(e.id);
     setBusyId(null);
 
     if (!result.ok) {
-      toast({ variant: "error", title: "Action impossible", description: result.error });
+      toast({
+        variant: "error",
+        title: "Action impossible",
+        description: result.error,
+      });
       return;
     }
 
@@ -117,7 +127,7 @@ export function AllEventsTab({ events }: { events: AdminEventListItem[] }) {
                   <td className="px-4 py-3.5 text-right">
                     <div className="flex items-center justify-end gap-2">
                       <Link
-                        href={`/admin/evenements/${e.id}`}
+                        href={`${ADMIN_EVENTS_PATH}/${e.id}`}
                         className="inline-flex items-center gap-1.5 rounded-pill px-3 py-1.5 text-xs font-semibold text-gray-500 hover:bg-gray-100"
                       >
                         <Eye className="h-3.5 w-3.5" aria-hidden /> Voir
@@ -129,7 +139,8 @@ export function AllEventsTab({ events }: { events: AdminEventListItem[] }) {
                           onClick={() => toggle(e)}
                           className="inline-flex items-center gap-1.5 rounded-pill border-[1.5px] border-red-200 bg-white px-3 py-1.5 text-xs font-semibold text-red-500 hover:bg-red-50 disabled:opacity-50"
                         >
-                          <EyeOff className="h-3.5 w-3.5" aria-hidden /> Dépublier
+                          <EyeOff className="h-3.5 w-3.5" aria-hidden />{" "}
+                          Dépublier
                         </button>
                       ) : (
                         <button

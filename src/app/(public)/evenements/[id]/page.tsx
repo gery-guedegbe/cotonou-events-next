@@ -2,15 +2,18 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ChevronRight, ArrowLeft, ExternalLink } from "lucide-react";
-import { getPublishedEvents, getEventById, getSimilarEvents } from "@/lib/supabase/events";
 import {
-  eventSchema,
-  breadcrumbSchema,
-  jsonLdString,
-} from "@/lib/seo/schema";
+  getPublishedEvents,
+  getEventById,
+  getSimilarEvents,
+} from "@/lib/supabase/events";
+import { eventSchema, breadcrumbSchema, jsonLdString } from "@/lib/seo/schema";
 import { truncateAtWord } from "@/lib/utils/text";
 import { formatLocation } from "@/lib/utils/location";
-import { EventDetailView, EventHeroImage } from "@/components/events/EventDetailView";
+import {
+  EventDetailView,
+  EventHeroImage,
+} from "@/components/events/EventDetailView";
 import { EventCard } from "@/components/events/EventCard";
 import { ShareCard } from "@/components/events/ShareCard";
 
@@ -42,10 +45,7 @@ export async function generateMetadata({
     .filter(Boolean)
     .join(" · ");
 
-  const description = truncateAtWord(
-    `${facts}. ${event.description}`,
-    155,
-  );
+  const description = truncateAtWord(`${facts}. ${event.description}`, 155);
 
   return {
     title: event.title,

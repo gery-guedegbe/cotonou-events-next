@@ -8,6 +8,7 @@ import { CATEGORIES } from "@/lib/constants/categories";
 import { approveEvent, rejectEvent } from "@/lib/actions/admin-events";
 import { useToast } from "@/components/ui/Toast";
 import type { AdminPendingEvent } from "@/lib/supabase/admin";
+import { ADMIN_EVENTS_PATH } from "@/lib/constants/admin-path";
 
 interface PendingTabProps {
   pending: AdminPendingEvent[];
@@ -111,7 +112,7 @@ export function PendingTab({ pending, onChange }: PendingTabProps) {
             </button>
 
             <Link
-              href={`/admin/evenements/${p.id}`}
+              href={`${ADMIN_EVENTS_PATH}/${p.id}`}
               className="inline-flex items-center gap-1.5 rounded-pill px-3 py-2.5 text-sm font-semibold text-gray-500 hover:bg-gray-100"
             >
               <Eye className="h-[15px] w-[15px]" aria-hidden /> Voir

@@ -3,37 +3,58 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Check, X, EyeOff } from "lucide-react";
-import { approveEvent, rejectEvent, unpublishEvent } from "@/lib/actions/admin-events";
+import {
+  approveEvent,
+  rejectEvent,
+  unpublishEvent,
+} from "@/lib/actions/admin-events";
 import { useToast } from "@/components/ui/Toast";
 import { Button } from "@/components/ui/Button";
 import type { EventStatut } from "@/lib/supabase/admin";
+import { ADMIN_BASE_PATH } from "@/lib/constants/admin-path";
 
 type ActionResult = { ok: true } | { ok: false; error: string };
 
-export function EventModerationActions({ id, statut }: { id: string; statut: EventStatut }) {
+export function EventModerationActions({
+  id,
+  statut,
+}: {
+  id: string;
+  statut: EventStatut;
+}) {
   const router = useRouter();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
 
-  const run = async (action: () => Promise<ActionResult>, successTitle: string) => {
+  const run = async (
+    action: () => Promise<ActionResult>,
+    successTitle: string,
+  ) => {
     setLoading(true);
     const result = await action();
     setLoading(false);
 
     if (!result.ok) {
-      toast({ variant: "error", title: "Action impossible", description: result.error });
+      toast({
+        variant: "error",
+        title: "Action impossible",
+        description: result.error,
+      });
       return;
     }
 
     toast({ variant: "success", title: successTitle });
-    router.push("/admin");
+    router.push(ADMIN_BASE_PATH);
     router.refresh();
   };
 
   return (
     <div className="flex flex-wrap gap-2.5">
       {statut !== "publie" && (
-        <Button loading={loading} onClick={() => run(() => approveEvent(id), "Événement publié")}>
+        <Button
+          loading={loading}
+          onClick={() => run(() => approveEvent(id), "Événement publié")}
+        >
           <Check className="h-4 w-4" aria-hidden /> Publier
         </Button>
       )}

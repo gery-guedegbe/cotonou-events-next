@@ -8,23 +8,28 @@ import {
 } from "@/lib/supabase/admin";
 import { isUpcomingWeekend } from "@/lib/utils/format-date";
 import { AdminDashboard } from "@/components/admin/AdminDashboard";
+import { ADMIN_BASE_PATH, ADMIN_LOGIN_PATH } from "@/lib/constants/admin-path";
 
 export default async function AdminPage() {
   const supabase = await createServerSupabaseClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/admin/login");
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  const [allEvents, pending, recentSubmissions, { subscribers, trend }] = await Promise.all([
-    getAllAdminEvents(),
-    getAdminPendingEvents(),
-    getRecentSubmissions(),
-    getAdminSubscribersData(),
-  ]);
+  if (!user) redirect(ADMIN_LOGIN_PATH);
+
+  const [allEvents, pending, recentSubmissions, { subscribers, trend }] =
+    await Promise.all([
+      getAllAdminEvents(),
+      getAdminPendingEvents(),
+      getRecentSubmissions(),
+      getAdminSubscribersData(),
+    ]);
 
   const published = allEvents.filter((e) => e.statut === "publie");
-  // isUpcomingWeekend borne déjà la fenêtre au week-end qui arrive, donc plus
-  // besoin de comparer à la date du jour séparément.
-  const weekendCount = published.filter((e) => isUpcomingWeekend(e.date)).length;
+  const weekendCount = published.filter((e) =>
+    isUpcomingWeekend(e.date),
+  ).length;
   const activeSubscribers = subscribers.filter((s) => s.active).length;
 
   return (

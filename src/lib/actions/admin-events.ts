@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { requireAdminUser } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
+import { ADMIN_BASE_PATH } from "@/lib/constants/admin-path";
 
 type ActionResult = { ok: true } | { ok: false; error: string };
 
@@ -23,7 +24,7 @@ async function setStatut(
     return { ok: false, error: "Erreur lors de la mise à jour. Réessayez." };
   }
 
-  revalidatePath("/admin");
+  revalidatePath(ADMIN_BASE_PATH);
   revalidatePath("/evenements");
   revalidatePath("/");
   return { ok: true };

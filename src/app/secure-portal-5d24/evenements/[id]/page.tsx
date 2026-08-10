@@ -3,9 +3,13 @@ import { notFound, redirect } from "next/navigation";
 import { ArrowLeft, Phone, Mail, Facebook } from "lucide-react";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getAdminEventById } from "@/lib/supabase/admin";
-import { EventDetailView, EventHeroImage } from "@/components/events/EventDetailView";
+import {
+  EventDetailView,
+  EventHeroImage,
+} from "@/components/events/EventDetailView";
 import { EventModerationActions } from "@/components/admin/EventModerationActions";
 import { cn } from "@/lib/utils/cn";
+import { ADMIN_BASE_PATH, ADMIN_LOGIN_PATH } from "@/lib/constants/admin-path";
 
 const STATUT_BADGE: Record<string, string> = {
   en_attente: "bg-amber-100 text-amber-800",
@@ -19,21 +23,25 @@ const STATUT_LABEL: Record<string, string> = {
   rejete: "Rejeté",
 };
 
-type Params = Promise<{ id: string }>;
-
-export default async function AdminEventDetailPage({ params }: { params: Params }) {
+export default async function AdminEventDetailPage({
+  params,
+}: {
+  params: { id: string };
+}) {
   const supabase = await createServerSupabaseClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/admin/login");
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  const { id } = await params;
-  const event = await getAdminEventById(id);
+  if (!user) redirect(ADMIN_LOGIN_PATH);
+
+  const event = await getAdminEventById(params.id);
   if (!event) notFound();
 
   return (
     <div className="mx-auto max-w-[900px] p-6">
       <Link
-        href="/admin"
+        href={ADMIN_BASE_PATH}
         className="inline-flex items-center gap-1.5 text-sm font-semibold text-gray-700 hover:text-brand"
       >
         <ArrowLeft className="h-4 w-4" aria-hidden /> Retour au dashboard
@@ -77,7 +85,12 @@ export default async function AdminEventDetailPage({ params }: { params: Params 
           {event.contactFb && (
             <div className="flex items-center gap-2.5">
               <Facebook className="h-4 w-4 flex-none text-brand" aria-hidden />
-              <a href={event.contactFb} target="_blank" rel="noopener noreferrer" className="hover:text-brand">
+              <a
+                href={event.contactFb}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-brand"
+              >
                 {event.contactFb}
               </a>
             </div>

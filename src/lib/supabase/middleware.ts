@@ -1,9 +1,9 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { ADMIN_BASE_PATH, ADMIN_LOGIN_PATH } from "@/lib/constants/admin-path";
 
 /**
- * Rafraîchit la session Supabase à chaque requête et protège /admin : redirige
- * vers /admin/login si non connecté, et inversement loin de /admin/login si déjà connecté.
+ * Rafraîchit la session Supabase à chaque requête et protège l'accès admin secret.
  */
 export async function updateAdminSession(request: NextRequest) {
   let response = NextResponse.next({ request });
@@ -33,17 +33,17 @@ export async function updateAdminSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const isLoginPage = request.nextUrl.pathname === "/admin/login";
+  const isLoginPage = request.nextUrl.pathname === ADMIN_LOGIN_PATH;
 
   if (!isLoginPage && !user) {
     const url = request.nextUrl.clone();
-    url.pathname = "/admin/login";
+    url.pathname = ADMIN_LOGIN_PATH;
     return NextResponse.redirect(url);
   }
 
   if (isLoginPage && user) {
     const url = request.nextUrl.clone();
-    url.pathname = "/admin";
+    url.pathname = ADMIN_BASE_PATH;
     return NextResponse.redirect(url);
   }
 
