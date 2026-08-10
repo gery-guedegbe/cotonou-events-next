@@ -58,7 +58,6 @@ export function getLoginLockoutState() {
     blockedUntil,
     remainingAttempts: Math.max(0, MAX_ATTEMPTS - state.attempts),
     isBlocked: Boolean(blockedUntil),
-    blockedUntil,
   };
 }
 
