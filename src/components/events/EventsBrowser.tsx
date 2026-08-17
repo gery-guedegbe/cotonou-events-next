@@ -30,7 +30,10 @@ export function EventsBrowser({ events }: { events: CotonouEvent[] }) {
   const [page, setPage] = useState(1);
   const [drawer, setDrawer] = useState(false);
 
-  const results = useMemo(() => filterEvents(filters, query, events), [filters, query, events]);
+  const results = useMemo(
+    () => filterEvents(filters, query, events),
+    [filters, query, events],
+  );
   const totalPages = Math.max(1, Math.ceil(results.length / PAGE_SIZE));
   const current = Math.min(page, totalPages);
   const pageItems = results.slice(
@@ -82,7 +85,7 @@ export function EventsBrowser({ events }: { events: CotonouEvent[] }) {
           />
         </aside>
 
-        <div>
+        <div className="min-w-0">
           {results.length === 0 ? (
             <EmptyState
               icon={SearchX}
@@ -101,35 +104,44 @@ export function EventsBrowser({ events }: { events: CotonouEvent[] }) {
               </div>
 
               {totalPages > 1 && (
-                <div className="mt-10 flex items-center justify-center gap-1.5">
+                <div className="mt-10 flex items-center justify-between gap-1.5 sm:justify-center">
+                  {/* Bouton Précédent */}
                   <button
                     onClick={() => setPage((p) => Math.max(1, p - 1))}
                     disabled={current === 1}
-                    className="flex h-11 items-center gap-1 rounded-pill border-[1.5px] border-gray-200 px-4 text-sm font-semibold text-gray-700 disabled:cursor-not-allowed disabled:text-gray-400"
+                    className="flex h-11 flex-none items-center gap-1 rounded-pill border-[1.5px] border-gray-200 px-3 text-sm font-semibold text-gray-700 disabled:cursor-not-allowed disabled:text-gray-400 sm:px-4"
+                    aria-label="Page précédente"
                   >
-                    <ChevronLeft className="h-4 w-4" aria-hidden /> Précédent
+                    <ChevronLeft className="h-4 w-4" aria-hidden />
+                    <span className="hidden sm:inline">Précédent</span>
                   </button>
 
-                  {Array.from({ length: totalPages }).map((_, i) => (
-                    <button
-                      key={i}
-                      onClick={() => setPage(i + 1)}
-                      className={`h-11 w-11 rounded-full text-sm font-bold ${
-                        current === i + 1
-                          ? "bg-brand text-white"
-                          : "bg-gray-100 text-gray-700"
-                      }`}
-                    >
-                      {i + 1}
-                    </button>
-                  ))}
+                  {/* Zone défilable pour les numéros de page sur mobile */}
+                  <div className="no-scrollbar flex max-w-[200px] items-center gap-1.5 overflow-x-auto py-1 sm:max-w-none">
+                    {Array.from({ length: totalPages }).map((_, i) => (
+                      <button
+                        key={i}
+                        onClick={() => setPage(i + 1)}
+                        className={`flex h-11 w-11 flex-none items-center justify-center rounded-full text-sm font-bold ${
+                          current === i + 1
+                            ? "bg-brand text-white"
+                            : "bg-gray-100 text-gray-700"
+                        }`}
+                      >
+                        {i + 1}
+                      </button>
+                    ))}
+                  </div>
 
+                  {/* Bouton Suivant */}
                   <button
                     onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                     disabled={current === totalPages}
-                    className="flex h-11 items-center gap-1 rounded-pill border-[1.5px] border-gray-200 px-4 text-sm font-semibold text-gray-700 disabled:cursor-not-allowed disabled:text-gray-400"
+                    className="flex h-11 flex-none items-center gap-1 rounded-pill border-[1.5px] border-gray-200 px-3 text-sm font-semibold text-gray-700 disabled:cursor-not-allowed disabled:text-gray-400 sm:px-4"
+                    aria-label="Page suivante"
                   >
-                    Suivant <ChevronRight className="h-4 w-4" aria-hidden />
+                    <span className="hidden sm:inline">Suivant</span>
+                    <ChevronRight className="h-4 w-4" aria-hidden />
                   </button>
                 </div>
               )}
